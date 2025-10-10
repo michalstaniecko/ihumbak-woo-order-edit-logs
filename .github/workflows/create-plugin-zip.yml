@@ -18,7 +18,7 @@ jobs:
         run: |
           VERSION=$(date +%Y%m%d-%H%M%S)
           PLUGIN_NAME="ihumbak-woo-order-edit-logs"
-          ZIP_NAME="${PLUGIN_NAME}-${VERSION}.zip"
+          ZIP_NAME="${PLUGIN_NAME}-${VERSION}"
 
           mkdir -p ${PLUGIN_NAME}/${PLUGIN_NAME}
 
@@ -30,5 +30,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ZIP_NAME }}
-          path: ${{ env.PLUGIN_NAME }}
+          path: ${{ env.PLUGIN_NAME }}/${{ env.PLUGIN_NAME }}
           retention-days: 30
