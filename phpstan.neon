@@ -1,0 +1,22 @@
+parameters:
+	level: 8
+	paths:
+		- includes
+	bootstrapFiles:
+		- phpstan-bootstrap.php
+	excludePaths:
+		- tests/*
+		- vendor/*
+	ignoreErrors:
+		# WordPress functions
+		- '#Function (add_action|add_filter|do_action|apply_filters|__) not found#'
+		- '#Function (get_option|update_option|delete_option) not found#'
+		- '#Function (wp_nonce_field|wp_verify_nonce|check_admin_referer) not found#'
+		- '#Function (esc_html|esc_attr|esc_url|wp_kses_post) not found#'
+		- '#Function (current_user_can|wp_get_current_user) not found#'
+		# WooCommerce functions
+		- '#Function wc_get_order not found#'
+		# WordPress classes
+		- '#Class (WP_Error|wpdb|WP_User) not found#'
+		# WooCommerce classes
+		- '#Class WC_Order not found#'

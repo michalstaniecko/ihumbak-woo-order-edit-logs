@@ -26,34 +26,34 @@
 
 **Cel:** Przygotowanie środowiska pracy i infrastruktury projektu.  
 **Szacowany czas:** 1-2 dni  
-**Status:** 🟢 W planowaniu
+**Status:** ✅ Ukończony
 
 ### Zadania:
 
 - [x] Analiza wymagań z README.md i SPECIFICATION.md
 - [x] Utworzenie planu pracy (WORKING_PLAN.md)
-- [ ] Konfiguracja środowiska deweloperskiego
-  - [ ] Lokalna instalacja WordPress (wersja 5.8+)
-  - [ ] Instalacja WooCommerce (wersja 6.0+)
-  - [ ] Konfiguracja PHP 7.4/8.0+
-  - [ ] Instalacja narzędzi deweloperskich (WP-CLI, Composer)
-- [ ] Inicjalizacja struktury katalogów projektu
-- [ ] Konfiguracja Git i GitHub
-  - [ ] .gitignore
-  - [ ] README.md (już istnieje)
-  - [ ] CHANGELOG.md
-  - [ ] .editorconfig
-- [ ] Konfiguracja narzędzi do testowania
-  - [ ] PHPUnit
-  - [ ] PHP_CodeSniffer (WordPress Coding Standards)
-  - [ ] PHPStan/Psalm (analiza statyczna)
+- [x] Konfiguracja środowiska deweloperskiego
+  - [x] Konfiguracja PHP 7.4/8.0+ (wymagane w composer.json)
+  - [x] Instalacja narzędzi deweloperskich (Composer)
+  - ℹ️ Lokalna instalacja WordPress i WooCommerce - do wykonania przez dewelopera w środowisku lokalnym
+- [x] Inicjalizacja struktury katalogów projektu
+- [x] Konfiguracja Git i GitHub
+  - [x] .gitignore
+  - [x] README.md (już istnieje)
+  - [x] CHANGELOG.md
+  - [x] .editorconfig
+- [x] Konfiguracja narzędzi do testowania
+  - [x] PHPUnit (phpunit.xml.dist)
+  - [x] PHP_CodeSniffer (phpcs.xml + WordPress Coding Standards)
+  - [x] PHPStan (phpstan.neon + analiza statyczna)
+  - [x] Composer setup (composer.json)
 
 ### Deliverables:
 - ✅ WORKING_PLAN.md
-- [ ] Skonfigurowane środowisko deweloperskie
-- [ ] Podstawowa struktura katalogów
-- [ ] CHANGELOG.md
-- [ ] Konfiguracja narzędzi deweloperskich
+- ✅ Podstawowa struktura katalogów (includes/, assets/, languages/, tests/)
+- ✅ CHANGELOG.md
+- ✅ Konfiguracja narzędzi deweloperskich (composer.json, phpunit.xml.dist, phpcs.xml, phpstan.neon)
+- ✅ Pliki konfiguracyjne Git (.gitignore, .editorconfig)
 
 ---
 
