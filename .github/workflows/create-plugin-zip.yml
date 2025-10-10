@@ -22,7 +22,7 @@ jobs:
 
           mkdir -p ${PLUGIN_NAME}
 
-          cp -r assets includes languages ihumbak-woo-order-edit-logs.php ./${PLUGIN_NAME}
+          cp -r assets includes languages ihumbak-woo-order-edit-logs.php uninstall.php ./${PLUGIN_NAME}
           zip -r ${ZIP_NAME}.zip ${PLUGIN_NAME}
           echo "ZIP_NAME=${ZIP_NAME}" >> $GITHUB_ENV
           echo "PLUGIN_NAME=${PLUGIN_NAME}" >> $GITHUB_ENV

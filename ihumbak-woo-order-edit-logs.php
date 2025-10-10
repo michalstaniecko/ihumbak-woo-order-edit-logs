@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name: iHumBak - WooCommerce Order Edit Logs
+ * Plugin Name: iHumbak - WooCommerce Order Edit Logs
  * Plugin URI: https://github.com/michalstaniecko/ihumbak-woo-order-edit-logs
  * Description: Automatyczne zbieranie i przechowywanie szczegółowych logów wszystkich zmian przeprowadzanych w zamówieniach WooCommerce
  * Version: 1.0.0
- * Author: Michał Staniećko
- * Author URI: https://ihumbak.com
+ * Author: Michał Staniecko
+ * Author URI: https://ihumbak.website
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: ihumbak-order-logs
@@ -167,16 +167,16 @@ function ihumbak_order_logs_autoloader( $class ) {
 	// Convert namespace separators to directory separators.
 	// Convert class name to file name (e.g., Order_Logger to class-order-logger.php).
 	$relative_class = str_replace( '\\', '/', $relative_class );
-	
+
 	// Split by last slash to get the class name.
 	$parts = explode( '/', $relative_class );
 	$class_name = array_pop( $parts );
-	
+
 	// Convert CamelCase or Snake_Case to kebab-case and add class- prefix.
 	$class_name = strtolower( preg_replace( '/([a-z])([A-Z])/', '$1-$2', $class_name ) );
 	$class_name = str_replace( '_', '-', $class_name );
 	$file_name = 'class-' . $class_name . '.php';
-	
+
 	// Rebuild the path.
 	if ( ! empty( $parts ) ) {
 		$relative_path = implode( '/', $parts ) . '/' . $file_name;
