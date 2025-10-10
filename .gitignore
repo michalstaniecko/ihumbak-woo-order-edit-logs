@@ -1,0 +1,75 @@
+# WordPress
+wp-config.php
+wp-content/uploads/
+wp-content/blogs.dir/
+wp-content/upgrade/
+wp-content/backup-db/
+wp-content/advanced-cache.php
+wp-content/wp-cache-config.php
+wp-content/cache/
+wp-content/cache/supercache/
+
+# WordPress Themes
+wp-content/themes/*/
+
+# WordPress Plugins (except this one)
+wp-content/plugins/*/
+!wp-content/plugins/ihumbak-woo-order-edit-logs/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+
+# IDE
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# Composer
+/vendor/
+composer.lock
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+# Build files
+/build/
+/dist/
+
+# Testing
+/coverage/
+/.phpunit.result.cache
+/phpunit.xml
+
+# Logs
+*.log
+error_log
+
+# Temporary files
+/tmp/
+*.tmp
+*.bak
+*.cache
+
+# Environment
+.env
+.env.local
