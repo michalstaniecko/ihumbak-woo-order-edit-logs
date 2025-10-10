@@ -61,23 +61,23 @@
 
 **Cel:** Utworzenie podstawowej struktury pluginu, głównego pliku i systemu ładowania klas.  
 **Szacowany czas:** 2-3 dni  
-**Status:** ⚪ Oczekuje
+**Status:** ✅ Ukończony
 
 ### Zadania:
 
 #### 1.1. Główny Plik Pluginu
-- [ ] Utworzenie `ihumbak-woo-order-edit-logs.php`
-  - [ ] Nagłówek pluginu z metadanymi
-  - [ ] Sprawdzenie wymagań (WordPress, WooCommerce, PHP)
-  - [ ] Inicjalizacja pluginu
-  - [ ] Hooki aktywacji/deaktywacji
-- [ ] Utworzenie `uninstall.php`
-  - [ ] Czyszczenie opcji
-  - [ ] Opcjonalne usuwanie tabel (z pytaniem)
+- [x] Utworzenie `ihumbak-woo-order-edit-logs.php`
+  - [x] Nagłówek pluginu z metadanymi
+  - [x] Sprawdzenie wymagań (WordPress, WooCommerce, PHP)
+  - [x] Inicjalizacja pluginu
+  - [x] Hooki aktywacji/deaktywacji
+- [x] Utworzenie `uninstall.php`
+  - [x] Czyszczenie opcji
+  - [x] Opcjonalne usuwanie tabel (z pytaniem)
 
 #### 1.2. Autoloader i Struktura Klas
-- [ ] Implementacja PSR-4 autoloadera
-- [ ] Utworzenie struktury katalogów zgodnie ze SPECIFICATION.md
+- [x] Implementacja PSR-4 autoloadera
+- [x] Utworzenie struktury katalogów zgodnie ze SPECIFICATION.md
   ```
   includes/
   ├── class-order-logger.php
@@ -99,31 +99,31 @@
   ```
 
 #### 1.3. Baza Danych
-- [ ] Utworzenie klasy `class-log-database.php`
-- [ ] Implementacja metody tworzenia tabeli `wp_ihumbak_order_logs`
-- [ ] SQL zgodny ze SPECIFICATION.md (indeksy, typy kolumn)
-- [ ] System wersjonowania schematu bazy
-- [ ] Hook aktywacji - tworzenie tabel
+- [x] Utworzenie klasy `class-log-database.php`
+- [x] Implementacja metody tworzenia tabeli `wp_ihumbak_order_logs`
+- [x] SQL zgodny ze SPECIFICATION.md (indeksy, typy kolumn)
+- [x] System wersjonowania schematu bazy
+- [x] Hook aktywacji - tworzenie tabel
 
 #### 1.4. HPOS Compatibility Layer
-- [ ] Utworzenie klasy `class-hpos-compatibility.php`
-- [ ] Implementacja wykrywania trybu storage (CPT vs HPOS)
-- [ ] Uniwersalne metody dostępu do zamówień
-- [ ] Abstrakcja różnic między trybami
-- [ ] Pomocnicze metody do porównywania stanów zamówień
+- [x] Utworzenie klasy `class-hpos-compatibility.php`
+- [x] Implementacja wykrywania trybu storage (CPT vs HPOS)
+- [x] Uniwersalne metody dostępu do zamówień
+- [x] Abstrakcja różnic między trybami
+- [x] Pomocnicze metody do porównywania stanów zamówień
 
 ### Deliverables:
-- [ ] Funkcjonalny szkielet pluginu
-- [ ] Tabela w bazie danych
-- [ ] Warstwa kompatybilności HPOS
-- [ ] System autoloadingu
-- [ ] Podstawowe testy jednostkowe dla struktury
+- [x] Funkcjonalny szkielet pluginu
+- [x] Tabela w bazie danych
+- [x] Warstwa kompatybilności HPOS
+- [x] System autoloadingu
+- [x] Podstawowe testy jednostkowe dla struktury
 
 ### Testy:
-- [ ] Aktywacja/deaktywacja pluginu bez błędów
-- [ ] Tworzenie tabeli w bazie danych
-- [ ] Wykrywanie trybu HPOS
-- [ ] Deinstalacja z usuwaniem/zachowaniem danych
+- [x] Aktywacja/deaktywacja pluginu bez błędów
+- [x] Tworzenie tabeli w bazie danych
+- [x] Wykrywanie trybu HPOS
+- [x] Deinstalacja z usuwaniem/zachowaniem danych
 
 ---
 
