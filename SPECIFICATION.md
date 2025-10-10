@@ -139,6 +139,7 @@ ihumbak-woo-order-edit-logs/
 │   ├── class-log-tracker.php            # Śledzenie zmian
 │   ├── class-log-formatter.php          # Formatowanie danych
 │   ├── class-log-exporter.php           # Eksport danych
+│   ├── class-hpos-compatibility.php     # Obsługa kompatybilności HPOS
 │   ├── admin/
 │   │   ├── class-admin-interface.php    # Interface administratora
 │   │   ├── class-log-viewer.php         # Przeglądarka logów
@@ -148,7 +149,7 @@ ihumbak-woo-order-edit-logs/
 │   │       ├── log-details.php          # Szczegóły logu
 │   │       └── settings-page.php        # Strona ustawień
 │   └── hooks/
-│       ├── order-hooks.php              # Hooki zamówień
+│       ├── order-hooks.php              # Hooki zamówień (HPOS-compatible)
 │       ├── product-hooks.php            # Hooki produktów
 │       ├── address-hooks.php            # Hooki adresów
 │       └── payment-hooks.php            # Hooki płatności
@@ -163,6 +164,12 @@ ihumbak-woo-order-edit-logs/
 ├── ihumbak-woo-order-edit-logs.php      # Główny plik pluginu
 └── uninstall.php                         # Skrypt deinstalacji
 ```
+
+**Nowa klasa: class-hpos-compatibility.php**
+- Wykrywanie aktywnego trybu storage (CPT vs HPOS)
+- Uniwersalne metody dostępu do zamówień
+- Abstrakcja różnic między trybami
+- Pomocnicze metody do porównywania stanów zamówień
 
 ### 3.2. Baza Danych
 
@@ -200,34 +207,52 @@ CREATE TABLE `wp_ihumbak_order_logs` (
 
 ### 3.3. Hooki WordPress/WooCommerce
 
-Plugin wykorzystuje następujące hooki do przechwytywania zmian:
+Plugin wykorzystuje następujące hooki do przechwytywania zmian. Wszystkie hooki są kompatybilne z HPOS (High-Performance Order Storage):
 
-#### 3.3.1. Hooki Zamówień
-- `woocommerce_new_order` - Nowe zamówienie
-- `woocommerce_update_order` - Aktualizacja zamówienia
-- `woocommerce_order_status_changed` - Zmiana statusu
-- `woocommerce_before_order_object_save` - Przed zapisem zamówienia
-- `woocommerce_after_order_object_save` - Po zapisie zamówienia
+#### 3.3.1. Hooki Zamówień (HPOS-Compatible)
+- `woocommerce_new_order` - Nowe zamówienie (args: $order_id, $order)
+- `woocommerce_update_order` - Aktualizacja zamówienia (args: $order_id, $order)
+- `woocommerce_order_status_changed` - Zmiana statusu (args: $order_id, $from_status, $to_status, $order)
 
-#### 3.3.2. Hooki Produktów
-- `woocommerce_before_save_order_items` - Przed zapisem produktów
-- `woocommerce_saved_order_items` - Po zapisie produktów
-- `woocommerce_new_order_item` - Nowy produkt
-- `woocommerce_update_order_item` - Aktualizacja produktu
-- `woocommerce_delete_order_item` - Usunięcie produktu
+**Strategia śledzenia zmian:**
+- Przed zapisem: przechowywanie aktualnego stanu zamówienia w transient/cache
+- Po zapisie: porównanie nowego stanu z zapisanym wcześniej
+- Wykorzystanie metody `$order->get_changes()` do wykrywania zmienionych pól
+- Obsługa zarówno trybu CPT (Custom Post Type) jak i HPOS
 
-#### 3.3.3. Hooki Adresów
-- `woocommerce_order_before_calculate_totals` - Przed przeliczeniem
-- Monitoring zmian w `_billing_*` i `_shipping_*` meta fields
+#### 3.3.2. Hooki Produktów (Order Items)
+- `woocommerce_before_save_order_items` - Przed zapisem produktów (args: $order_id, $items)
+- `woocommerce_saved_order_items` - Po zapisie produktów (args: $order_id, $items)
+- `woocommerce_new_order_item` - Nowy produkt (args: $item_id, $item, $order_id)
+- `woocommerce_update_order_item` - Aktualizacja produktu (args: $item_id, $item, $order_id)
+- `woocommerce_delete_order_item` - Usunięcie produktu (args: $item_id)
+- `woocommerce_before_delete_order_item` - Przed usunięciem (args: $item_id)
+
+#### 3.3.3. Hooki Zmian w Zamówieniu
+- `woocommerce_before_save_order_items` - Przechowywanie stanu przed zmianą
+- Porównanie obiektów zamówienia przed i po zapisie
+- Monitoring getterów: `get_billing_*()`, `get_shipping_*()`, `get_total()`, etc.
 
 #### 3.3.4. Hooki Notatek
-- `woocommerce_new_order_note` - Nowa notatka
-- `woocommerce_delete_order_note` - Usunięcie notatki
+- `woocommerce_new_order_note` - Nowa notatka (args: $note_id, $order_note_data)
+- `woocommerce_delete_order_note` - Usunięcie notatki (args: $note_id, $order)
 
-#### 3.3.5. Hooki Metadanych
-- `update_post_meta` - Aktualizacja metadanych
-- `add_post_meta` - Dodanie metadanych
-- `delete_post_meta` - Usunięcie metadanych
+#### 3.3.5. Hooki Metadanych (HPOS-Compatible)
+**Dla trybu CPT (tradycyjnego):**
+- `updated_post_meta` - Aktualizacja metadanych (args: $meta_id, $object_id, $meta_key, $meta_value)
+- `added_post_meta` - Dodanie metadanych (args: $meta_id, $object_id, $meta_key, $meta_value)
+- `deleted_post_meta` - Usunięcie metadanych (args: $meta_ids, $object_id, $meta_key, $meta_value)
+
+**Dla trybu HPOS:**
+- `update_metadata` - Filter do przechwytywania zmian meta (sprawdzenie object_type)
+- Alternatywnie: hook w `woocommerce_update_order` i sprawdzanie zmian przez `$order->get_meta_data()`
+
+#### 3.3.6. Dodatkowe Hooki dla Szczególnych Przypadków
+- `woocommerce_order_refunded` - Zwrot zamówienia
+- `woocommerce_order_fully_refunded` - Pełny zwrot
+- `woocommerce_refund_created` - Utworzenie zwrotu
+- `woocommerce_payment_complete` - Płatność zakończona
+- `woocommerce_order_action_*` - Akcje masowe na zamówieniach
 
 ## 4. Interfejs Użytkownika
 
@@ -392,7 +417,7 @@ ID Logu, ID Zamówienia, Data/Czas, Użytkownik, Rola, Typ Akcji, Pole, Wartoś�
 ### 8.1. Wymagania Minimalne
 
 - WordPress: 5.8 lub wyższy
-- WooCommerce: 6.0 lub wyższy
+- WooCommerce: 6.0 lub wyższy (z obsługą HPOS)
 - PHP: 7.4 lub wyższy
 - MySQL: 5.6 lub wyższy / MariaDB: 10.0 lub wyższy
 
@@ -404,8 +429,89 @@ ID Logu, ID Zamówienia, Data/Czas, Użytkownik, Rola, Typ Akcji, Pole, Wartoś�
 - Popularne motywy: Storefront, Astra, OceanWP
 - WPML (wielojęzyczność)
 - Polylang (wielojęzyczność)
+- **WooCommerce HPOS** (High-Performance Order Storage) - pełna kompatybilność
 
-### 8.3. Znane Konflikty
+### 8.3. Kompatybilność z HPOS (High-Performance Order Storage)
+
+Plugin jest w pełni kompatybilny z WooCommerce HPOS i obsługuje oba tryby przechowywania zamówień:
+
+#### 8.3.1. Tryby Działania
+- **Tryb CPT (Custom Post Type)** - tradycyjne przechowywanie zamówień jako posty
+- **Tryb HPOS** - nowy system przechowywania w dedykowanych tabelach
+- **Tryb kompatybilności** - synchronizacja między CPT a HPOS
+
+#### 8.3.2. Implementacja HPOS
+
+**Wykrywanie aktywnego trybu:**
+```php
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
+if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+    // HPOS jest aktywny
+} else {
+    // Używany jest tradycyjny tryb CPT
+}
+```
+
+**Uniwersalne pobieranie zamówienia:**
+```php
+// Zamiast get_post()
+$order = wc_get_order( $order_id );
+
+// Użycie getterów zamiast bezpośredniego dostępu
+$status = $order->get_status();
+$total = $order->get_total();
+$billing_email = $order->get_billing_email();
+```
+
+**Obsługa metadanych:**
+```php
+// HPOS-compatible
+$order->update_meta_data( 'key', 'value' );
+$order->save();
+
+// Lub bezpośrednio
+update_post_meta( $order_id, 'key', 'value' ); // CPT
+$order->update_meta_data( 'key', 'value' ); // HPOS
+```
+
+#### 8.3.3. Hooki Specyficzne dla HPOS
+
+Plugin używa hooków kompatybilnych z HPOS:
+- ✅ `woocommerce_new_order` - działa w obu trybach
+- ✅ `woocommerce_update_order` - działa w obu trybach
+- ✅ `woocommerce_order_status_changed` - działa w obu trybach
+- ⚠️ `updated_post_meta` - tylko CPT (wymagana alternatywa dla HPOS)
+- ✅ Monitoring przez `$order->get_changes()` - HPOS-compatible
+
+#### 8.3.4. Strategia Porównywania Zmian
+
+Ponieważ nie ma hooków `before_save` dla zamówień, plugin używa następującej strategii:
+
+1. **Przed zapisem zamówienia:**
+   - Hook: `woocommerce_before_save_order_items`
+   - Akcja: Przechowanie aktualnego stanu zamówienia w transient
+   - Cache key: `ihumbak_order_snapshot_{$order_id}`
+
+2. **Po zapisie zamówienia:**
+   - Hook: `woocommerce_update_order`
+   - Akcja: Pobranie snapshotu i porównanie z aktualnym stanem
+   - Logowanie różnic
+
+3. **Użycie metody get_changes():**
+   ```php
+   $order = wc_get_order( $order_id );
+   $changes = $order->get_changes(); // Tablica zmienionych właściwości
+   ```
+
+#### 8.3.5. Testowanie HPOS
+
+Plugin musi być testowany w trzech scenariuszach:
+- [ ] Tylko CPT (HPOS wyłączony)
+- [ ] Tylko HPOS (CPT wyłączony)
+- [ ] Tryb kompatybilności (synchronizacja CPT ↔ HPOS)
+
+### 8.4. Znane Konflikty
 
 Lista pluginów, które mogą powodować konflikty (do uzupełnienia podczas testów)
 
@@ -500,10 +606,13 @@ Plik CHANGELOG.md z listą zmian w każdej wersji
 - Symulacja zmian zamówień
 - Weryfikacja poprawności logowania
 - Testy wydajnościowe z dużą liczbą logów
+- **Testy kompatybilności HPOS** (wszystkie scenariusze w 3 trybach: CPT, HPOS, kompatybilności)
 
 ### 13.3. Testy Manualne
 
 Checklist testów przed release:
+
+**Podstawowe Testy Funkcjonalności:**
 - [ ] Zmiana statusu zamówienia
 - [ ] Zmiana adresu wysyłki
 - [ ] Zmiana adresu rozliczeniowego
@@ -524,6 +633,14 @@ Checklist testów przed release:
 - [ ] Wyszukiwanie logów
 - [ ] Czyszczenie starych logów
 - [ ] Deinstalacja pluginu
+
+**Testy Kompatybilności HPOS:**
+- [ ] Wszystkie powyższe testy z HPOS wyłączonym (tylko CPT)
+- [ ] Wszystkie powyższe testy z HPOS włączonym (tylko HPOS)
+- [ ] Wszystkie powyższe testy w trybie kompatybilności (CPT + HPOS)
+- [ ] Migracja z CPT do HPOS (sprawdzenie czy logi są prawidłowo zapisywane przed i po)
+- [ ] Migracja z HPOS do CPT (sprawdzenie czy logi są prawidłowo zapisywane przed i po)
+- [ ] Weryfikacja że order_id odnosi się do prawidłowego zamówienia w obu trybach
 
 ## 14. Roadmap (Przyszłe Funkcjonalności)
 

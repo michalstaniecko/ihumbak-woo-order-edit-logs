@@ -64,9 +64,18 @@ Plugin idealnie sprawdzi się w:
 ## 📋 Wymagania
 
 - **WordPress:** 5.8 lub wyższy
-- **WooCommerce:** 6.0 lub wyższy
+- **WooCommerce:** 6.0 lub wyższy (z pełną obsługą HPOS)
 - **PHP:** 7.4 lub wyższy
 - **MySQL:** 5.6+ lub MariaDB 10.0+
+
+## ⚡ Kompatybilność z HPOS
+
+Plugin jest w pełni kompatybilny z **WooCommerce High-Performance Order Storage (HPOS)**:
+- ✅ Obsługa tradycyjnego trybu CPT (Custom Post Type)
+- ✅ Obsługa nowego trybu HPOS
+- ✅ Obsługa trybu kompatybilności (synchronizacja CPT ↔ HPOS)
+- ✅ Automatyczne wykrywanie aktywnego trybu storage
+- ✅ Wszystkie funkcje działają identycznie w obu trybach
 
 ## 🚀 Instalacja
 
