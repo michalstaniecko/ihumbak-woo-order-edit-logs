@@ -93,6 +93,20 @@ function ihumbak_order_logs_check_requirements() {
 }
 
 /**
+ * Declare HPOS compatibility.
+ */
+function ihumbak_order_logs_declare_hpos_compatibility() {
+	if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
+		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility(
+			'custom_order_tables',
+			__FILE__,
+			true
+		);
+	}
+}
+add_action( 'before_woocommerce_init', 'ihumbak_order_logs_declare_hpos_compatibility' );
+
+/**
  * Load plugin textdomain.
  */
 function ihumbak_order_logs_load_textdomain() {
