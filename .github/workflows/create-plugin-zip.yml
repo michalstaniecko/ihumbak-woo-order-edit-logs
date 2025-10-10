@@ -1,0 +1,67 @@
+name: Create Plugin ZIP on Main Branch Update
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  create-zip:
+    name: Create Plugin ZIP
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          tools: composer
+
+      - name: Install dependencies
+        run: composer install --no-dev --optimize-autoloader
+
+      - name: Create plugin ZIP
+        run: |
+          # Get plugin version from composer.json or set a default
+          VERSION=$(date +%Y%m%d-%H%M%S)
+          PLUGIN_NAME="ihumbak-woo-order-edit-logs"
+          ZIP_NAME="${PLUGIN_NAME}-${VERSION}.zip"
+
+          # Create a temporary directory for the plugin
+          mkdir -p /tmp/${PLUGIN_NAME}
+
+          # Copy plugin files (excluding development files)
+          rsync -av --exclude='.git' \
+            --exclude='.github' \
+            --exclude='node_modules' \
+            --exclude='tests' \
+            --exclude='phpunit.xml.dist' \
+            --exclude='phpcs.xml' \
+            --exclude='phpstan.neon' \
+            --exclude='phpstan-bootstrap.php' \
+            --exclude='.editorconfig' \
+            --exclude='composer.json' \
+            --exclude='composer.lock' \
+            --exclude='DEVELOPMENT.md' \
+            --exclude='WORKING_PLAN.md' \
+            --exclude='SPECIFICATION.md' \
+            --exclude='.gitignore' \
+            ./ /tmp/${PLUGIN_NAME}/
+
+          # Create ZIP file
+          cd /tmp
+          zip -r ${ZIP_NAME} ${PLUGIN_NAME}
+          mv ${ZIP_NAME} ${GITHUB_WORKSPACE}/
+
+          echo "Created ZIP file: ${ZIP_NAME}"
+          echo "ZIP_NAME=${ZIP_NAME}" >> $GITHUB_ENV
+
+      - name: Upload ZIP as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: plugin-zip
+          path: ${{ env.ZIP_NAME }}
+          retention-days: 30
