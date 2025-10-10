@@ -20,31 +20,13 @@ jobs:
           PLUGIN_NAME="ihumbak-woo-order-edit-logs"
           ZIP_NAME="${PLUGIN_NAME}-${VERSION}.zip"
 
-          # Create ZIP directly from repository content
-          zip -r ${ZIP_NAME} . \
-            -x ".git/*" \
-            -x ".github/*" \
-            -x "node_modules/*" \
-            -x "tests/*" \
-            -x "phpunit.xml.dist" \
-            -x "phpcs.xml" \
-            -x "phpstan.neon" \
-            -x "phpstan-bootstrap.php" \
-            -x ".editorconfig" \
-            -x "composer.json" \
-            -x "composer.lock" \
-            -x "DEVELOPMENT.md" \
-            -x "WORKING_PLAN.md" \
-            -x "SPECIFICATION.md" \
-            -x ".gitignore" \
-            -x "ETAP1_SUMMARY.md"
+          mkdir ${PLUGIN_NAME}
 
-          echo "Created ZIP file: ${ZIP_NAME}"
-          echo "ZIP_NAME=${ZIP_NAME}" >> $GITHUB_ENV
+          cp -r assets includes languages ihumbak-woo-order-edit-logs.php ./${PLUGIN_NAME}
 
       - name: Upload ZIP as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: plugin-zip
-          path: ${{ env.ZIP_NAME }}
+          name: ${{ env.ZIP_NAME }}
+          path: ${{ env.PLUGIN_NAME }}
           retention-days: 30
