@@ -23,6 +23,8 @@ jobs:
           mkdir ${PLUGIN_NAME}
 
           cp -r assets includes languages ihumbak-woo-order-edit-logs.php ./${PLUGIN_NAME}
+          echo "ZIP_NAME=${ZIP_NAME}" >> $GITHUB_ENV
+          echo "PLUGIN_NAME=${PLUGIN_NAME}" >> $GITHUB_ENV
 
       - name: Upload ZIP as artifact
         uses: actions/upload-artifact@v4
