@@ -23,12 +23,25 @@ _another_meta_field
 
 ## How It Works
 
-Once configured, the plugin will:
+Once configured, the plugin tracks custom meta field changes using two complementary approaches:
 
-1. **Store snapshots** of the custom meta field values before any order is saved
+### 1. Snapshot-Based Tracking
+When an order is saved using WooCommerce's save methods (e.g., `$order->update_meta_data()` + `$order->save()`):
+
+1. **Store snapshots** of the custom meta field values before the order is saved
 2. **Compare values** after the order is saved to detect changes
 3. **Log changes** with the action type `custom_field_changed`
-4. **Display logs** in the order logs viewer showing old and new values
+
+### 2. Direct Meta Update Tracking
+When custom meta fields are updated directly using WordPress functions (e.g., `update_post_meta()`):
+
+1. **Monitor metadata changes** through WordPress hooks
+2. **Capture old and new values** before the update occurs
+3. **Log changes** immediately with the action type `custom_field_changed`
+
+This dual approach ensures that custom meta field changes are tracked regardless of how your theme or plugins update the metadata.
+
+**Display logs** in the order logs viewer showing old and new values
 
 ## Technical Details
 
@@ -71,10 +84,27 @@ Track changes to custom internal notes or order metadata that your team maintain
 ## Compatibility
 
 This feature is compatible with both:
-- **Traditional WooCommerce storage** (Custom Post Types)
+- **Traditional WooCommerce storage** (Custom Post Types - CPT mode)
 - **High-Performance Order Storage (HPOS)**
 
 The plugin automatically detects which storage method is in use and handles the meta fields accordingly.
+
+### Supported Update Methods
+
+The plugin tracks custom meta field changes regardless of the method used:
+
+1. **WordPress native functions** (CPT mode):
+   ```php
+   update_post_meta( $order_id, '_billing_vat', $vat_number );
+   ```
+
+2. **WooCommerce order methods** (works in both CPT and HPOS):
+   ```php
+   $order->update_meta_data( '_billing_vat', $vat_number );
+   $order->save();
+   ```
+
+Both approaches are fully supported and will be properly tracked.
 
 ## Notes
 

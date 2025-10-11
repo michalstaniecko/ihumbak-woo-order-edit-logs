@@ -52,9 +52,44 @@ Then visit: `wp-admin/?test_add_vat=1&order_id=123` (replace 123 with actual ord
 
 ### Step 4: Modify the Custom Meta Field
 
-1. Open the order in the admin panel
-2. Modify the `_billing_vat` meta field value (e.g., change from 'PL1234567890' to 'PL9876543210')
-3. Save the order
+You can modify the custom meta field using either method:
+
+**Method 1: Direct update_post_meta() (simulates theme behavior in CPT mode)**
+```php
+// Add this temporarily to your theme's functions.php or a custom plugin
+add_action('admin_init', function() {
+    if (isset($_GET['test_update_vat'])) {
+        $order_id = absint($_GET['order_id']);
+        if ($order_id) {
+            // Direct meta update - plugin will track this
+            update_post_meta($order_id, '_billing_vat', 'PL9876543210');
+            echo '<div class="notice notice-success"><p>VAT number updated via update_post_meta()!</p></div>';
+        }
+    }
+});
+```
+
+**Method 2: WooCommerce order save (works in both CPT and HPOS)**
+```php
+// Add this temporarily to your theme's functions.php or a custom plugin
+add_action('admin_init', function() {
+    if (isset($_GET['test_update_vat_wc'])) {
+        $order_id = absint($_GET['order_id']);
+        if ($order_id) {
+            $order = wc_get_order($order_id);
+            if ($order) {
+                $order->update_meta_data('_billing_vat', 'PL9876543210');
+                $order->save();
+                echo '<div class="notice notice-success"><p>VAT number updated via WooCommerce methods!</p></div>';
+            }
+        }
+    }
+});
+```
+
+Test both methods to verify tracking works correctly:
+- Visit: `wp-admin/?test_update_vat=1&order_id=123` (for direct update_post_meta)
+- Visit: `wp-admin/?test_update_vat_wc=1&order_id=123` (for WooCommerce methods)
 
 ### Step 5: Verify the Log Entry
 
