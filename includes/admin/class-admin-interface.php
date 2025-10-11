@@ -81,6 +81,9 @@ class Admin_Interface {
 		
 		// Add order meta box.
 		add_action( 'add_meta_boxes', array( $this, 'add_order_meta_box' ) );
+		
+		// AJAX handlers.
+		add_action( 'wp_ajax_ihumbak_get_order_logs', array( $this, 'ajax_get_order_logs' ) );
 	}
 
 	/**
@@ -206,17 +209,32 @@ class Admin_Interface {
 			// CPT mode - $post_or_order_object is a WP_Post object.
 			$order_id = $post_or_order_object->ID;
 		}
-		$page = 1;
+		
+		$this->render_order_logs_html( $order_id, 1 );
+	}
+
+	/**
+	 * Render order logs HTML (used by both initial render and AJAX).
+	 *
+	 * @param int $order_id Order ID.
+	 * @param int $page     Current page number.
+	 */
+	private function render_order_logs_html( $order_id, $page = 1 ) {
 		$per_page = 10;
+		$offset = ( $page - 1 ) * $per_page;
 
 		// Get logs for this order.
 		$logs = \IHumBak\WooOrderEditLogs\Log_Database::get_logs_by_order(
 			$order_id,
 			array(
 				'limit'  => $per_page,
-				'offset' => 0,
+				'offset' => $offset,
 			)
 		);
+
+		// Get total count for pagination.
+		$total_logs = \IHumBak\WooOrderEditLogs\Log_Database::count_logs_by_order( $order_id );
+		$total_pages = ceil( $total_logs / $per_page );
 
 		?>
 		<div class="ihumbak-order-logs-metabox">
@@ -289,6 +307,46 @@ class Admin_Interface {
 						<?php endforeach; ?>
 					</tbody>
 				</table>
+
+				<?php if ( $total_pages > 1 ) : ?>
+					<div class="ihumbak-logs-pagination">
+						<?php
+						// Previous button.
+						if ( $page > 1 ) {
+							printf(
+								'<a href="#" class="ihumbak-logs-page-link button" data-page="%d" data-order-id="%d">%s</a> ',
+								$page - 1,
+								$order_id,
+								esc_html__( '« Previous', 'ihumbak-order-logs' )
+							);
+						}
+
+						// Page numbers.
+						for ( $i = 1; $i <= $total_pages; $i++ ) {
+							if ( $i === $page ) {
+								printf( '<span class="current-page">%d</span> ', $i );
+							} else {
+								printf(
+									'<a href="#" class="ihumbak-logs-page-link" data-page="%d" data-order-id="%d">%d</a> ',
+									$i,
+									$order_id,
+									$i
+								);
+							}
+						}
+
+						// Next button.
+						if ( $page < $total_pages ) {
+							printf(
+								'<a href="#" class="ihumbak-logs-page-link button" data-page="%d" data-order-id="%d">%s</a>',
+								$page + 1,
+								$order_id,
+								esc_html__( 'Next »', 'ihumbak-order-logs' )
+							);
+						}
+						?>
+					</div>
+				<?php endif; ?>
 			<?php else : ?>
 				<div class="ihumbak-order-logs-empty">
 					<?php esc_html_e( 'No changes recorded yet.', 'ihumbak-order-logs' ); ?>
@@ -296,5 +354,39 @@ class Admin_Interface {
 			<?php endif; ?>
 		</div>
 		<?php
+	}
+
+	/**
+	 * AJAX handler for loading order logs with pagination.
+	 */
+	public function ajax_get_order_logs() {
+		// Verify nonce.
+		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'ihumbak_order_logs_nonce' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid nonce.', 'ihumbak-order-logs' ) ) );
+		}
+
+		// Verify required parameters.
+		if ( ! isset( $_POST['order_id'] ) || ! isset( $_POST['page'] ) ) {
+			wp_send_json_error( array( 'message' => __( 'Missing parameters.', 'ihumbak-order-logs' ) ) );
+		}
+
+		$order_id = absint( $_POST['order_id'] );
+		$page = absint( $_POST['page'] );
+
+		if ( $order_id <= 0 || $page <= 0 ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid parameters.', 'ihumbak-order-logs' ) ) );
+		}
+
+		// Check user capabilities.
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_send_json_error( array( 'message' => __( 'You do not have permission to view order logs.', 'ihumbak-order-logs' ) ) );
+		}
+
+		// Render the logs HTML.
+		ob_start();
+		$this->render_order_logs_html( $order_id, $page );
+		$html = ob_get_clean();
+
+		wp_send_json_success( array( 'html' => $html ) );
 	}
 }
