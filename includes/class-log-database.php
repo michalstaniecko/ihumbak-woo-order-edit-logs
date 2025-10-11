@@ -121,17 +121,17 @@ class Log_Database {
 			$table_name,
 			$data,
 			array(
-				'%d', // order_id
 				'%d', // user_id
 				'%s', // user_display_name
 				'%s', // user_role
 				'%s', // timestamp
+				'%s', // ip_address
+				'%s', // user_agent
+				'%d', // order_id
 				'%s', // action_type
 				'%s', // field_name
 				'%s', // old_value
 				'%s', // new_value
-				'%s', // ip_address
-				'%s', // user_agent
 				'%s', // additional_data
 			)
 		);

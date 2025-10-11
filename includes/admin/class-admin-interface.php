@@ -78,10 +78,10 @@ class Admin_Interface {
 
 		// Initialize Settings.
 		$this->settings = Settings::get_instance();
-		
+
 		// Add order meta box.
 		add_action( 'add_meta_boxes', array( $this, 'add_order_meta_box' ) );
-		
+
 		// AJAX handlers.
 		add_action( 'wp_ajax_ihumbak_get_order_logs', array( $this, 'ajax_get_order_logs' ) );
 	}
@@ -184,7 +184,7 @@ class Admin_Interface {
 	 */
 	public function add_order_meta_box() {
 		$screen = wc_get_page_screen_id( 'shop-order' );
-		
+
 		add_meta_box(
 			'ihumbak_order_logs',
 			__( 'Order Change History', 'ihumbak-order-logs' ),
@@ -209,7 +209,7 @@ class Admin_Interface {
 			// CPT mode - $post_or_order_object is a WP_Post object.
 			$order_id = $post_or_order_object->ID;
 		}
-		
+
 		$this->render_order_logs_html( $order_id, 1 );
 	}
 
@@ -260,14 +260,14 @@ class Admin_Interface {
 									?>
 								</td>
 								<td class="log-user">
-									<?php echo esc_html( $log->user_display_name ); ?>
+									<?php echo esc_html( $log->user_display_name ); ?> (<?php echo esc_html( $log->user_id ); ?>)
 								</td>
 								<td>
 									<?php
 									$logger = \IHumBak\WooOrderEditLogs\Order_Logger::get_instance();
 									$action_types = $logger->get_action_types();
-									$label = isset( $action_types[ $log->action_type ] ) 
-										? $action_types[ $log->action_type ] 
+									$label = isset( $action_types[ $log->action_type ] )
+										? $action_types[ $log->action_type ]
 										: $log->action_type;
 									echo esc_html( $label );
 									?>
