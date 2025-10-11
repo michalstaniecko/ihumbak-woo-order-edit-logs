@@ -170,6 +170,27 @@ class Settings {
 				'id'   => 'ihumbak_order_logs_performance',
 			),
 
+			// Custom Fields section.
+			array(
+				'title' => __( 'Custom Meta Fields Tracking', 'ihumbak-order-logs' ),
+				'type'  => 'title',
+				'id'    => 'ihumbak_order_logs_custom_fields',
+				'desc'  => __( 'Track changes to custom post meta fields on orders.', 'ihumbak-order-logs' ),
+			),
+			array(
+				'title'       => __( 'Custom Meta Fields', 'ihumbak-order-logs' ),
+				'desc'        => __( 'Enter custom meta field names to track (one per line). Example: _billing_vat', 'ihumbak-order-logs' ),
+				'id'          => 'ihumbak_order_logs_custom_meta_fields',
+				'default'     => '',
+				'type'        => 'textarea',
+				'css'         => 'min-height: 100px;',
+				'placeholder' => "_billing_vat\n_custom_field_name",
+			),
+			array(
+				'type' => 'sectionend',
+				'id'   => 'ihumbak_order_logs_custom_fields',
+			),
+
 			// Export section.
 			array(
 				'title' => __( 'Export Settings', 'ihumbak-order-logs' ),
@@ -253,5 +274,26 @@ class Settings {
 	 */
 	public function get_retention_days() {
 		return absint( $this->get_option( 'ihumbak_order_logs_retention_days', 90 ) );
+	}
+
+	/**
+	 * Get custom meta fields to track.
+	 *
+	 * @return array Array of meta field names.
+	 */
+	public function get_custom_meta_fields() {
+		$fields = $this->get_option( 'ihumbak_order_logs_custom_meta_fields', '' );
+		
+		if ( empty( $fields ) ) {
+			return array();
+		}
+		
+		// Split by newlines and clean up.
+		$fields_array = array_map( 'trim', explode( "\n", $fields ) );
+		
+		// Remove empty lines.
+		$fields_array = array_filter( $fields_array );
+		
+		return $fields_array;
 	}
 }
