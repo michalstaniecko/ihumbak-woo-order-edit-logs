@@ -61,6 +61,18 @@ class Order_Logger {
 		
 		// Initialize hook files after WooCommerce is loaded.
 		add_action( 'woocommerce_init', array( $this, 'init_woocommerce_hooks' ) );
+		
+		// Initialize admin interface.
+		if ( is_admin() ) {
+			add_action( 'admin_init', array( $this, 'init_admin_interface' ) );
+		}
+	}
+	
+	/**
+	 * Initialize admin interface.
+	 */
+	public function init_admin_interface() {
+		\IHumBak\WooOrderEditLogs\Admin\Admin_Interface::get_instance();
 	}
 	
 	/**

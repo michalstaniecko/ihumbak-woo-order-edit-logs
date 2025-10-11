@@ -181,6 +181,174 @@ class Log_Database {
 	}
 
 	/**
+	 * Get all logs with optional filters.
+	 *
+	 * @param array $args Query arguments.
+	 * @return array Array of log entries.
+	 */
+	public static function get_logs( $args = array() ) {
+		global $wpdb;
+
+		$table_name = self::get_table_name();
+
+		$defaults = array(
+			'limit'       => 20,
+			'offset'      => 0,
+			'order_by'    => 'timestamp',
+			'order'       => 'DESC',
+			'action_type' => '',
+			'user_id'     => '',
+			'order_id'    => '',
+			'date_from'   => '',
+			'date_to'     => '',
+			'search'      => '',
+		);
+
+		$args = wp_parse_args( $args, $defaults );
+
+		$where = array( '1=1' );
+		$params = array();
+
+		// Filter by action type.
+		if ( ! empty( $args['action_type'] ) ) {
+			$where[] = 'action_type = %s';
+			$params[] = $args['action_type'];
+		}
+
+		// Filter by user ID.
+		if ( ! empty( $args['user_id'] ) ) {
+			$where[] = 'user_id = %d';
+			$params[] = absint( $args['user_id'] );
+		}
+
+		// Filter by order ID.
+		if ( ! empty( $args['order_id'] ) ) {
+			$where[] = 'order_id = %d';
+			$params[] = absint( $args['order_id'] );
+		}
+
+		// Filter by date range.
+		if ( ! empty( $args['date_from'] ) ) {
+			$where[] = 'timestamp >= %s';
+			$params[] = $args['date_from'] . ' 00:00:00';
+		}
+
+		if ( ! empty( $args['date_to'] ) ) {
+			$where[] = 'timestamp <= %s';
+			$params[] = $args['date_to'] . ' 23:59:59';
+		}
+
+		// Search in multiple fields.
+		if ( ! empty( $args['search'] ) ) {
+			$where[] = '(field_name LIKE %s OR old_value LIKE %s OR new_value LIKE %s OR user_display_name LIKE %s)';
+			$search_term = '%' . $wpdb->esc_like( $args['search'] ) . '%';
+			$params[] = $search_term;
+			$params[] = $search_term;
+			$params[] = $search_term;
+			$params[] = $search_term;
+		}
+
+		$where_clause = implode( ' AND ', $where );
+
+		// Build query.
+		if ( ! empty( $params ) ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$sql = $wpdb->prepare( "SELECT * FROM {$table_name} WHERE {$where_clause}", $params );
+		} else {
+			$sql = "SELECT * FROM {$table_name} WHERE {$where_clause}";
+		}
+
+		$sql .= $wpdb->prepare(
+			' ORDER BY %s %s LIMIT %d OFFSET %d',
+			esc_sql( $args['order_by'] ),
+			esc_sql( $args['order'] ),
+			$args['limit'],
+			$args['offset']
+		);
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+		return $wpdb->get_results( $sql );
+	}
+
+	/**
+	 * Count total logs with optional filters.
+	 *
+	 * @param array $args Query arguments (same as get_logs).
+	 * @return int Total number of logs.
+	 */
+	public static function count_logs( $args = array() ) {
+		global $wpdb;
+
+		$table_name = self::get_table_name();
+
+		$defaults = array(
+			'action_type' => '',
+			'user_id'     => '',
+			'order_id'    => '',
+			'date_from'   => '',
+			'date_to'     => '',
+			'search'      => '',
+		);
+
+		$args = wp_parse_args( $args, $defaults );
+
+		$where = array( '1=1' );
+		$params = array();
+
+		// Filter by action type.
+		if ( ! empty( $args['action_type'] ) ) {
+			$where[] = 'action_type = %s';
+			$params[] = $args['action_type'];
+		}
+
+		// Filter by user ID.
+		if ( ! empty( $args['user_id'] ) ) {
+			$where[] = 'user_id = %d';
+			$params[] = absint( $args['user_id'] );
+		}
+
+		// Filter by order ID.
+		if ( ! empty( $args['order_id'] ) ) {
+			$where[] = 'order_id = %d';
+			$params[] = absint( $args['order_id'] );
+		}
+
+		// Filter by date range.
+		if ( ! empty( $args['date_from'] ) ) {
+			$where[] = 'timestamp >= %s';
+			$params[] = $args['date_from'] . ' 00:00:00';
+		}
+
+		if ( ! empty( $args['date_to'] ) ) {
+			$where[] = 'timestamp <= %s';
+			$params[] = $args['date_to'] . ' 23:59:59';
+		}
+
+		// Search in multiple fields.
+		if ( ! empty( $args['search'] ) ) {
+			$where[] = '(field_name LIKE %s OR old_value LIKE %s OR new_value LIKE %s OR user_display_name LIKE %s)';
+			$search_term = '%' . $wpdb->esc_like( $args['search'] ) . '%';
+			$params[] = $search_term;
+			$params[] = $search_term;
+			$params[] = $search_term;
+			$params[] = $search_term;
+		}
+
+		$where_clause = implode( ' AND ', $where );
+
+		// Build query.
+		if ( ! empty( $params ) ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$sql = $wpdb->prepare( "SELECT COUNT(*) FROM {$table_name} WHERE {$where_clause}", $params );
+		} else {
+			$sql = "SELECT COUNT(*) FROM {$table_name} WHERE {$where_clause}";
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+		return absint( $wpdb->get_var( $sql ) );
+	}
+
+	/**
 	 * Delete old logs based on retention period.
 	 *
 	 * @param int $days Number of days to retain logs.
