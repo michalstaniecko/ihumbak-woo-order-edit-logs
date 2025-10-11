@@ -206,6 +206,29 @@
 	margin: 0 5px;
 }
 
+.ihumbak-order-logs-pagination .current-page {
+	display: inline-block;
+	padding: 4px 8px;
+	margin: 0 2px;
+	font-weight: 600;
+	background-color: #2271b1;
+	color: #fff;
+	border-radius: 3px;
+}
+
+.ihumbak-order-logs-pagination a.ihumbak-logs-page-link {
+	display: inline-block;
+	padding: 4px 8px;
+	margin: 0 2px;
+	text-decoration: none;
+	border: 1px solid #ddd;
+	border-radius: 3px;
+}
+
+.ihumbak-order-logs-pagination a.ihumbak-logs-page-link:hover {
+	background-color: #f0f0f0;
+}
+
 /* Responsive design */
 @media screen and (max-width: 782px) {
 	.wp-list-table.logs td {

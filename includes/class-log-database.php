@@ -168,16 +168,48 @@ class Log_Database {
 			$sql .= $wpdb->prepare( ' AND action_type = %s', $args['action_type'] );
 		}
 
-		$sql .= $wpdb->prepare(
+		// ORDER BY clause - column names must be sanitized with esc_sql, not prepared.
+		$sql .= sprintf(
 			' ORDER BY %s %s LIMIT %d OFFSET %d',
 			esc_sql( $args['order_by'] ),
 			esc_sql( $args['order'] ),
-			$args['limit'],
-			$args['offset']
+			absint( $args['limit'] ),
+			absint( $args['offset'] )
 		);
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
 		return $wpdb->get_results( $sql );
+	}
+
+	/**
+	 * Count logs for a specific order.
+	 *
+	 * @param int   $order_id Order ID.
+	 * @param array $args     Query arguments.
+	 * @return int Total number of logs for the order.
+	 */
+	public static function count_logs_by_order( $order_id, $args = array() ) {
+		global $wpdb;
+
+		$table_name = self::get_table_name();
+
+		$defaults = array(
+			'action_type' => '',
+		);
+
+		$args = wp_parse_args( $args, $defaults );
+
+		$sql = $wpdb->prepare(
+			"SELECT COUNT(*) FROM {$table_name} WHERE order_id = %d",
+			$order_id
+		);
+
+		if ( ! empty( $args['action_type'] ) ) {
+			$sql .= $wpdb->prepare( ' AND action_type = %s', $args['action_type'] );
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+		return absint( $wpdb->get_var( $sql ) );
 	}
 
 	/**
