@@ -111,6 +111,13 @@ class Order_Logger {
 				\IHumBak\WooOrderEditLogs\Hooks\init_payment_hooks();
 			}
 		}
+
+		if ( file_exists( $hooks_path . 'metadata-hooks.php' ) ) {
+			require_once $hooks_path . 'metadata-hooks.php';
+			if ( function_exists( 'IHumBak\WooOrderEditLogs\Hooks\init_metadata_hooks' ) ) {
+				\IHumBak\WooOrderEditLogs\Hooks\init_metadata_hooks();
+			}
+		}
 	}
 
 	/**
