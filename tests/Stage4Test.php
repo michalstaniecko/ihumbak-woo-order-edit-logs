@@ -247,6 +247,23 @@ class Stage4Test extends TestCase {
 	}
 
 	/**
+	 * Test Admin_Interface render_order_meta_box method exists and handles both WP_Post and WC_Order.
+	 */
+	public function test_admin_interface_render_meta_box_hpos_compatible() {
+		$this->assertTrue(
+			method_exists( 'IHumBak\WooOrderEditLogs\Admin\Admin_Interface', 'render_order_meta_box' ),
+			'Admin_Interface should have render_order_meta_box method'
+		);
+		
+		// Test that the method signature accepts both WP_Post and WC_Order objects
+		$reflection = new \ReflectionMethod( 'IHumBak\WooOrderEditLogs\Admin\Admin_Interface', 'render_order_meta_box' );
+		$parameters = $reflection->getParameters();
+		
+		$this->assertCount( 1, $parameters, 'render_order_meta_box should accept exactly one parameter' );
+		$this->assertEquals( 'post_or_order_object', $parameters[0]->getName(), 'Parameter should be named post_or_order_object for HPOS compatibility' );
+	}
+
+	/**
 	 * Test Log_Viewer class exists.
 	 */
 	public function test_log_viewer_exists() {
