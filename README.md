@@ -52,6 +52,8 @@ Plugin rejestruje następujące typy zmian:
 - 📅 Zmiany dat zamówienia
 - 🌐 Zmiana waluty
 
+**[📖 Zobacz jak śledzić własne pola niestandardowe](CUSTOM_META_FIELDS.md)**
+
 ## 🎯 Dla Kogo?
 
 Plugin idealnie sprawdzi się w:
