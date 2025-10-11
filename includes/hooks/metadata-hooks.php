@@ -53,6 +53,12 @@ function capture_meta_update( $check, $object_id, $meta_key, $meta_value, $prev_
 		return $check;
 	}
 
+	// Check if we're in the middle of an order save operation.
+	// If snapshot exists, let the snapshot approach handle logging.
+	if ( \IHumBak\WooOrderEditLogs\Log_Tracker::get_snapshot( $object_id ) !== false ) {
+		return $check;
+	}
+
 	// Get the current (old) value before it's updated.
 	$old_value = get_post_meta( $object_id, $meta_key, true );
 	
@@ -64,6 +70,8 @@ function capture_meta_update( $check, $object_id, $meta_key, $meta_value, $prev_
 	}
 
 	// Log the change immediately.
+	// This only happens when update_post_meta() is called directly,
+	// not when $order->save() is called (snapshot approach handles that).
 	$logger = Order_Logger::get_instance();
 	$logger->log_change(
 		$object_id,
