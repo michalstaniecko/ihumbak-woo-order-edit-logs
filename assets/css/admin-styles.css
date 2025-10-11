@@ -1,0 +1,272 @@
+/**
+ * Admin Styles for iHumBak Order Logs
+ *
+ * @package IHumBak\WooOrderEditLogs
+ */
+
+/* General log table styles */
+.wp-list-table.logs {
+	margin-top: 20px;
+}
+
+.wp-list-table.logs td {
+	vertical-align: top;
+}
+
+.wp-list-table.logs .column-log_id {
+	width: 80px;
+}
+
+.wp-list-table.logs .column-order_id {
+	width: 100px;
+}
+
+.wp-list-table.logs .column-timestamp {
+	width: 140px;
+}
+
+.wp-list-table.logs .column-user {
+	width: 150px;
+}
+
+.wp-list-table.logs .column-action_type {
+	width: 150px;
+}
+
+.wp-list-table.logs .column-field_name {
+	width: 120px;
+}
+
+.wp-list-table.logs .column-old_value,
+.wp-list-table.logs .column-new_value {
+	max-width: 200px;
+	word-wrap: break-word;
+}
+
+.wp-list-table.logs .column-ip_address {
+	width: 130px;
+}
+
+/* Filter controls */
+.tablenav .actions {
+	overflow: visible;
+}
+
+.tablenav .actions select,
+.tablenav .actions input[type="text"],
+.tablenav .actions input[type="number"] {
+	margin-right: 5px;
+	vertical-align: middle;
+}
+
+.tablenav .actions .ihumbak-datepicker {
+	width: 120px;
+}
+
+.tablenav .actions input[type="number"]#order_id {
+	width: 100px;
+}
+
+/* Log details modal */
+.ihumbak-log-modal {
+	display: none;
+	position: fixed;
+	z-index: 100000;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	overflow: auto;
+	background-color: rgba(0, 0, 0, 0.5);
+}
+
+.ihumbak-log-modal-content {
+	background-color: #fff;
+	margin: 5% auto;
+	padding: 20px;
+	border: 1px solid #ccc;
+	width: 80%;
+	max-width: 800px;
+	border-radius: 4px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.ihumbak-log-modal-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+	padding-bottom: 10px;
+	border-bottom: 1px solid #ddd;
+}
+
+.ihumbak-log-modal-header h2 {
+	margin: 0;
+}
+
+.ihumbak-log-modal-close {
+	color: #aaa;
+	font-size: 28px;
+	font-weight: bold;
+	cursor: pointer;
+	background: none;
+	border: none;
+	padding: 0;
+	line-height: 1;
+}
+
+.ihumbak-log-modal-close:hover,
+.ihumbak-log-modal-close:focus {
+	color: #000;
+}
+
+.ihumbak-log-detail-row {
+	display: flex;
+	margin-bottom: 15px;
+	padding: 10px;
+	background: #f9f9f9;
+	border-radius: 3px;
+}
+
+.ihumbak-log-detail-label {
+	font-weight: 600;
+	width: 180px;
+	flex-shrink: 0;
+	color: #555;
+}
+
+.ihumbak-log-detail-value {
+	flex: 1;
+	word-wrap: break-word;
+}
+
+.ihumbak-log-detail-value pre {
+	background: #fff;
+	padding: 10px;
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	overflow-x: auto;
+	margin: 0;
+}
+
+/* Order meta box styles */
+.ihumbak-order-logs-metabox {
+	margin: 0 -12px;
+}
+
+.ihumbak-order-logs-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.ihumbak-order-logs-table th,
+.ihumbak-order-logs-table td {
+	padding: 8px;
+	text-align: left;
+	border-bottom: 1px solid #ddd;
+}
+
+.ihumbak-order-logs-table th {
+	background-color: #f9f9f9;
+	font-weight: 600;
+}
+
+.ihumbak-order-logs-table tr:hover {
+	background-color: #f5f5f5;
+}
+
+.ihumbak-order-logs-table .log-timestamp {
+	white-space: nowrap;
+}
+
+.ihumbak-order-logs-table .log-user {
+	white-space: nowrap;
+}
+
+.ihumbak-order-logs-table .log-value {
+	max-width: 200px;
+	word-wrap: break-word;
+	font-family: monospace;
+	font-size: 0.95em;
+}
+
+.ihumbak-order-logs-empty {
+	padding: 20px;
+	text-align: center;
+	color: #666;
+	font-style: italic;
+}
+
+.ihumbak-order-logs-pagination {
+	margin-top: 15px;
+	text-align: center;
+}
+
+.ihumbak-order-logs-pagination .button {
+	margin: 0 5px;
+}
+
+/* Responsive design */
+@media screen and (max-width: 782px) {
+	.wp-list-table.logs td {
+		display: block;
+		width: 100%;
+		box-sizing: border-box;
+	}
+
+	.wp-list-table.logs td::before {
+		content: attr(data-colname) ": ";
+		font-weight: 600;
+	}
+
+	.wp-list-table.logs .column-log_id,
+	.wp-list-table.logs .column-order_id,
+	.wp-list-table.logs .column-timestamp,
+	.wp-list-table.logs .column-user,
+	.wp-list-table.logs .column-action_type,
+	.wp-list-table.logs .column-field_name,
+	.wp-list-table.logs .column-old_value,
+	.wp-list-table.logs .column-new_value,
+	.wp-list-table.logs .column-ip_address {
+		width: 100%;
+		max-width: none;
+	}
+
+	.ihumbak-log-modal-content {
+		width: 95%;
+		margin: 10% auto;
+	}
+
+	.ihumbak-log-detail-row {
+		flex-direction: column;
+	}
+
+	.ihumbak-log-detail-label {
+		width: 100%;
+		margin-bottom: 5px;
+	}
+
+	.tablenav .actions select,
+	.tablenav .actions input {
+		display: block;
+		width: 100%;
+		margin-bottom: 5px;
+	}
+}
+
+/* Loading spinner */
+.ihumbak-logs-loading {
+	display: inline-block;
+	width: 20px;
+	height: 20px;
+	border: 3px solid rgba(0, 0, 0, 0.1);
+	border-radius: 50%;
+	border-top-color: #0073aa;
+	animation: ihumbak-spin 1s ease-in-out infinite;
+}
+
+@keyframes ihumbak-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
