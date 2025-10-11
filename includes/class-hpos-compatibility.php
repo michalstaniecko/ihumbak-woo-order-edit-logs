@@ -103,7 +103,7 @@ class HPOS_Compatibility {
 			return false;
 		}
 
-		return array(
+		$data = array(
 			'status'            => $order->get_status(),
 			'currency'          => $order->get_currency(),
 			'total'             => $order->get_total(),
@@ -121,6 +121,14 @@ class HPOS_Compatibility {
 			'shipping_methods'  => self::get_shipping_methods_data( $order ),
 			'coupons'           => self::get_coupons_data( $order ),
 		);
+
+		// Add custom meta fields if configured.
+		$custom_meta = self::get_custom_meta_data( $order );
+		if ( ! empty( $custom_meta ) ) {
+			$data['custom_meta'] = $custom_meta;
+		}
+
+		return $data;
 	}
 
 	/**
@@ -214,6 +222,35 @@ class HPOS_Compatibility {
 		}
 
 		return $coupons_data;
+	}
+
+	/**
+	 * Get custom meta data from order.
+	 *
+	 * Gets the values of custom meta fields configured in settings.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @return array Custom meta data.
+	 */
+	private static function get_custom_meta_data( $order ) {
+		// Get configured custom meta fields from settings.
+		if ( ! class_exists( 'IHumBak\WooOrderEditLogs\Admin\Settings' ) ) {
+			return array();
+		}
+
+		$settings = \IHumBak\WooOrderEditLogs\Admin\Settings::get_instance();
+		$custom_fields = $settings->get_custom_meta_fields();
+
+		if ( empty( $custom_fields ) ) {
+			return array();
+		}
+
+		$custom_meta = array();
+		foreach ( $custom_fields as $field_name ) {
+			$custom_meta[ $field_name ] = $order->get_meta( $field_name, true );
+		}
+
+		return $custom_meta;
 	}
 
 	/**
