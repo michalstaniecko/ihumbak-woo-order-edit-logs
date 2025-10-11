@@ -58,6 +58,47 @@ class Order_Logger {
 
 		// Admin notices.
 		add_action( 'admin_notices', array( $this, 'admin_notices' ) );
+		
+		// Initialize hook files after WooCommerce is loaded.
+		add_action( 'woocommerce_init', array( $this, 'init_woocommerce_hooks' ) );
+	}
+	
+	/**
+	 * Initialize WooCommerce hooks.
+	 * 
+	 * Loads and initializes all hook files for tracking order changes.
+	 */
+	public function init_woocommerce_hooks() {
+		// Load hook files.
+		$hooks_path = IHUMBAK_ORDER_LOGS_PATH . 'includes/hooks/';
+		
+		if ( file_exists( $hooks_path . 'order-hooks.php' ) ) {
+			require_once $hooks_path . 'order-hooks.php';
+			if ( function_exists( 'IHumBak\WooOrderEditLogs\Hooks\init_order_hooks' ) ) {
+				\IHumBak\WooOrderEditLogs\Hooks\init_order_hooks();
+			}
+		}
+		
+		if ( file_exists( $hooks_path . 'product-hooks.php' ) ) {
+			require_once $hooks_path . 'product-hooks.php';
+			if ( function_exists( 'IHumBak\WooOrderEditLogs\Hooks\init_product_hooks' ) ) {
+				\IHumBak\WooOrderEditLogs\Hooks\init_product_hooks();
+			}
+		}
+		
+		if ( file_exists( $hooks_path . 'address-hooks.php' ) ) {
+			require_once $hooks_path . 'address-hooks.php';
+			if ( function_exists( 'IHumBak\WooOrderEditLogs\Hooks\init_address_hooks' ) ) {
+				\IHumBak\WooOrderEditLogs\Hooks\init_address_hooks();
+			}
+		}
+		
+		if ( file_exists( $hooks_path . 'payment-hooks.php' ) ) {
+			require_once $hooks_path . 'payment-hooks.php';
+			if ( function_exists( 'IHumBak\WooOrderEditLogs\Hooks\init_payment_hooks' ) ) {
+				\IHumBak\WooOrderEditLogs\Hooks\init_payment_hooks();
+			}
+		}
 	}
 
 	/**
