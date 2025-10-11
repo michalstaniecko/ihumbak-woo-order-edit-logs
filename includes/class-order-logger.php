@@ -64,7 +64,7 @@ class Order_Logger {
 
 		// Initialize admin interface.
 		if ( is_admin() ) {
-			add_action( 'admin_menu', array( $this, 'init_admin_interface' ) );
+			$this->init_admin_interface();
 		}
 	}
 

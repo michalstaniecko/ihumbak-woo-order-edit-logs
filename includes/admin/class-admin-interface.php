@@ -73,12 +73,6 @@ class Admin_Interface {
 		// Enqueue admin assets.
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
 
-		// Initialize Log Viewer.
-		$this->log_viewer = Log_Viewer::get_instance();
-
-		// Initialize Settings.
-		$this->settings = Settings::get_instance();
-
 		// Add order meta box.
 		add_action( 'add_meta_boxes', array( $this, 'add_order_meta_box' ) );
 
@@ -90,13 +84,14 @@ class Admin_Interface {
 	 * Register admin menu.
 	 */
 	public function register_menu() {
+		$log_viewer = $this->get_log_viewer();
 		add_submenu_page(
 			'woocommerce',
 			__( 'Order Logs', 'ihumbak-order-logs' ),
 			__( 'Order Logs', 'ihumbak-order-logs' ),
 			'manage_woocommerce',
 			'ihumbak-order-logs',
-			array( $this->log_viewer, 'render_page' )
+			array( $log_viewer, 'render_page' )
 		);
 	}
 
@@ -109,14 +104,14 @@ class Admin_Interface {
 		// Only load on our admin pages.
 		$allowed_hooks = array(
 			'woocommerce_page_ihumbak-order-logs',
-			'shop_order',
+			'woocommerce_page_wc-orders',
 			'woocommerce_page_wc-settings',
 		);
 
 		$is_order_edit = false;
 		if ( function_exists( 'get_current_screen' ) ) {
 			$screen = get_current_screen();
-			if ( $screen && 'shop_order' === $screen->id ) {
+			if ( $screen && 'woocommerce_page_wc-orders' === $screen->id ) {
 				$is_order_edit = true;
 			}
 		}
@@ -167,7 +162,7 @@ class Admin_Interface {
 	 * @return Log_Viewer
 	 */
 	public function get_log_viewer() {
-		return $this->log_viewer;
+		return Log_Viewer::get_instance();
 	}
 
 	/**
@@ -176,7 +171,7 @@ class Admin_Interface {
 	 * @return Settings
 	 */
 	public function get_settings() {
-		return $this->settings;
+		return Settings::get_instance();
 	}
 
 	/**
