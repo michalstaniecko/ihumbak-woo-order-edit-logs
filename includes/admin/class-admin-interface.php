@@ -195,10 +195,17 @@ class Admin_Interface {
 	/**
 	 * Render order meta box.
 	 *
-	 * @param \WP_Post $post Post object.
+	 * @param \WP_Post|\WC_Order $post_or_order_object Post object or Order object (HPOS).
 	 */
-	public function render_order_meta_box( $post ) {
-		$order_id = $post->ID;
+	public function render_order_meta_box( $post_or_order_object ) {
+		// Handle both CPT and HPOS modes.
+		if ( $post_or_order_object instanceof \WC_Order ) {
+			// HPOS mode - $post_or_order_object is a WC_Order object.
+			$order_id = $post_or_order_object->get_id();
+		} else {
+			// CPT mode - $post_or_order_object is a WP_Post object.
+			$order_id = $post_or_order_object->ID;
+		}
 		$page = 1;
 		$per_page = 10;
 
