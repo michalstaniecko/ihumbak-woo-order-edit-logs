@@ -120,9 +120,13 @@ function detect_order_changes( $order, $data_store ) {
 	}
 	
 	// Compare custom meta fields.
-	if ( isset( $snapshot['custom_meta'] ) && isset( $current_data['custom_meta'] ) ) {
-		foreach ( $snapshot['custom_meta'] as $meta_key => $old_value ) {
-			$new_value = isset( $current_data['custom_meta'][ $meta_key ] ) ? $current_data['custom_meta'][ $meta_key ] : '';
+	$snapshot_meta = isset( $snapshot['custom_meta'] ) ? $snapshot['custom_meta'] : array();
+	$current_meta = isset( $current_data['custom_meta'] ) ? $current_data['custom_meta'] : array();
+	
+	if ( ! empty( $snapshot_meta ) || ! empty( $current_meta ) ) {
+		// Check for changed or removed fields.
+		foreach ( $snapshot_meta as $meta_key => $old_value ) {
+			$new_value = isset( $current_meta[ $meta_key ] ) ? $current_meta[ $meta_key ] : '';
 			
 			if ( Log_Tracker::compare_scalar( $old_value, $new_value ) ) {
 				$logger->log_change(
@@ -136,15 +140,18 @@ function detect_order_changes( $order, $data_store ) {
 		}
 		
 		// Check for new custom meta fields that weren't in the snapshot.
-		foreach ( $current_data['custom_meta'] as $meta_key => $new_value ) {
-			if ( ! isset( $snapshot['custom_meta'][ $meta_key ] ) ) {
-				$logger->log_change(
-					$order_id,
-					'custom_field_changed',
-					$meta_key,
-					'',
-					$new_value
-				);
+		foreach ( $current_meta as $meta_key => $new_value ) {
+			if ( ! isset( $snapshot_meta[ $meta_key ] ) ) {
+				// Only log if the new value is not empty.
+				if ( ! empty( $new_value ) || ( is_string( $new_value ) && '0' === $new_value ) ) {
+					$logger->log_change(
+						$order_id,
+						'custom_field_changed',
+						$meta_key,
+						'',
+						$new_value
+					);
+				}
 			}
 		}
 	}
