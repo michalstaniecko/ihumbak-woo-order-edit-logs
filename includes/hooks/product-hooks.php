@@ -130,7 +130,7 @@ function log_order_item_updated( $item_id, $item, $order_id ) {
 
 	$new_price = $item->get_total();
 	// Log price/total changes.
-	if ( isset( $changes['total'] ) || isset( $changes['subtotal'] ) ) {
+	if ( !empty( $old_price ) && $old_price != $new_price ) {
 		$logger->log_change(
 			$order_id,
 			'product_price_changed',
