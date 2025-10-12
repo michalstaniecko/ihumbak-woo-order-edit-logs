@@ -204,15 +204,16 @@ class Admin_Interface {
 			// CPT mode - $post_or_order_object is a WP_Post object.
 			$order_id = $post_or_order_object->ID;
 		}
-
+		echo '<div class="ihumbak-order-logs-metabox">';
 		$this->render_order_logs_html( $order_id, 1 );
+		echo '</div>';
 	}
 
 	/**
 	 * Render order logs HTML (used by both initial render and AJAX).
 	 *
 	 * @param int $order_id Order ID.
-	 * @param int $page     Current page number.
+	 * @param int $page Current page number.
 	 */
 	private function render_order_logs_html( $order_id, $page = 1 ) {
 		$per_page = 10;
@@ -231,124 +232,121 @@ class Admin_Interface {
 		$total_logs = \IHumBak\WooOrderEditLogs\Log_Database::count_logs_by_order( $order_id );
 		$total_pages = ceil( $total_logs / $per_page );
 
-		?>
-		<div class="ihumbak-order-logs-metabox">
-			<?php if ( ! empty( $logs ) ) : ?>
-				<table class="ihumbak-order-logs-table">
-					<thead>
-						<tr>
-							<th><?php esc_html_e( 'Date/Time', 'ihumbak-order-logs' ); ?></th>
-							<th><?php esc_html_e( 'User', 'ihumbak-order-logs' ); ?></th>
-							<th><?php esc_html_e( 'Action', 'ihumbak-order-logs' ); ?></th>
-							<th><?php esc_html_e( 'Field', 'ihumbak-order-logs' ); ?></th>
-							<th><?php esc_html_e( 'Old Value', 'ihumbak-order-logs' ); ?></th>
-							<th><?php esc_html_e( 'New Value', 'ihumbak-order-logs' ); ?></th>
-						</tr>
-					</thead>
-					<tbody>
-						<?php foreach ( $logs as $log ) : ?>
-							<tr>
-								<td class="log-timestamp">
-									<?php
-									$timestamp = strtotime( $log->timestamp );
-									echo esc_html( date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $timestamp ) );
-									?>
-								</td>
-								<td class="log-user">
-									<?php echo esc_html( $log->user_display_name ); ?> (<?php echo esc_html( $log->user_id ); ?>)
-								</td>
-								<td>
-									<?php
-									$logger = \IHumBak\WooOrderEditLogs\Order_Logger::get_instance();
-									$action_types = $logger->get_action_types();
-									$label = isset( $action_types[ $log->action_type ] )
-										? $action_types[ $log->action_type ]
-										: $log->action_type;
-									echo esc_html( $label );
-									?>
-								</td>
-								<td>
-									<?php echo esc_html( $log->field_name ?: '—' ); ?>
-								</td>
-								<td class="log-value">
-									<?php
-									if ( empty( $log->old_value ) ) {
-										echo '<em>' . esc_html__( '(empty)', 'ihumbak-order-logs' ) . '</em>';
-									} else {
-										$value = esc_html( $log->old_value );
-										if ( strlen( $value ) > 50 ) {
-											echo esc_html( substr( $value, 0, 50 ) ) . '...';
-										} else {
-											echo $value;
-										}
-									}
-									?>
-								</td>
-								<td class="log-value">
-									<?php
-									if ( empty( $log->new_value ) ) {
-										echo '<em>' . esc_html__( '(empty)', 'ihumbak-order-logs' ) . '</em>';
-									} else {
-										$value = esc_html( $log->new_value );
-										if ( strlen( $value ) > 50 ) {
-											echo esc_html( substr( $value, 0, 50 ) ) . '...';
-										} else {
-											echo $value;
-										}
-									}
-									?>
-								</td>
-							</tr>
-						<?php endforeach; ?>
-					</tbody>
-				</table>
-
-				<?php if ( $total_pages > 1 ) : ?>
-					<div class="ihumbak-logs-pagination">
-						<?php
-						// Previous button.
-						if ( $page > 1 ) {
-							printf(
-								'<a href="#" class="ihumbak-logs-page-link button" data-page="%d" data-order-id="%d">%s</a> ',
-								$page - 1,
-								$order_id,
-								esc_html__( '« Previous', 'ihumbak-order-logs' )
-							);
-						}
-
-						// Page numbers.
-						for ( $i = 1; $i <= $total_pages; $i++ ) {
-							if ( $i === $page ) {
-								printf( '<span class="current-page">%d</span> ', $i );
+		if ( ! empty( $logs ) ) : ?>
+			<table class="ihumbak-order-logs-table">
+				<thead>
+				<tr>
+					<th><?php esc_html_e( 'Date/Time', 'ihumbak-order-logs' ); ?></th>
+					<th><?php esc_html_e( 'User', 'ihumbak-order-logs' ); ?></th>
+					<th><?php esc_html_e( 'Action', 'ihumbak-order-logs' ); ?></th>
+					<th><?php esc_html_e( 'Field', 'ihumbak-order-logs' ); ?></th>
+					<th><?php esc_html_e( 'Old Value', 'ihumbak-order-logs' ); ?></th>
+					<th><?php esc_html_e( 'New Value', 'ihumbak-order-logs' ); ?></th>
+				</tr>
+				</thead>
+				<tbody>
+				<?php foreach ( $logs as $log ) : ?>
+					<tr>
+						<td class="log-timestamp">
+							<?php
+							$timestamp = strtotime( $log->timestamp );
+							echo esc_html( date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $timestamp ) );
+							?>
+						</td>
+						<td class="log-user">
+							<?php echo esc_html( $log->user_display_name ); ?> (<?php echo esc_html( $log->user_id ); ?>
+							)
+						</td>
+						<td>
+							<?php
+							$logger = \IHumBak\WooOrderEditLogs\Order_Logger::get_instance();
+							$action_types = $logger->get_action_types();
+							$label = isset( $action_types[ $log->action_type ] )
+								? $action_types[ $log->action_type ]
+								: $log->action_type;
+							echo esc_html( $label );
+							?>
+						</td>
+						<td>
+							<?php echo esc_html( $log->field_name ?: '—' ); ?>
+						</td>
+						<td class="log-value">
+							<?php
+							if ( empty( $log->old_value ) ) {
+								echo '<em>' . esc_html__( '(empty)', 'ihumbak-order-logs' ) . '</em>';
 							} else {
-								printf(
-									'<a href="#" class="ihumbak-logs-page-link" data-page="%d" data-order-id="%d">%d</a> ',
-									$i,
-									$order_id,
-									$i
-								);
+								$value = esc_html( $log->old_value );
+								if ( strlen( $value ) > 50 ) {
+									echo esc_html( substr( $value, 0, 50 ) ) . '...';
+								} else {
+									echo $value;
+								}
 							}
-						}
+							?>
+						</td>
+						<td class="log-value">
+							<?php
+							if ( empty( $log->new_value ) ) {
+								echo '<em>' . esc_html__( '(empty)', 'ihumbak-order-logs' ) . '</em>';
+							} else {
+								$value = esc_html( $log->new_value );
+								if ( strlen( $value ) > 50 ) {
+									echo esc_html( substr( $value, 0, 50 ) ) . '...';
+								} else {
+									echo $value;
+								}
+							}
+							?>
+						</td>
+					</tr>
+				<?php endforeach; ?>
+				</tbody>
+			</table>
 
-						// Next button.
-						if ( $page < $total_pages ) {
+			<?php if ( $total_pages > 1 ) : ?>
+				<div class="ihumbak-logs-pagination">
+					<?php
+					// Previous button.
+					if ( $page > 1 ) {
+						printf(
+							'<a href="#" class="ihumbak-logs-page-link button" data-page="%d" data-order-id="%d">%s</a> ',
+							$page - 1,
+							$order_id,
+							esc_html__( '« Previous', 'ihumbak-order-logs' )
+						);
+					}
+
+					// Page numbers.
+					for ( $i = 1; $i <= $total_pages; $i++ ) {
+						if ( $i === $page ) {
+							printf( '<span class="current-page">%d</span> ', $i );
+						} else {
 							printf(
-								'<a href="#" class="ihumbak-logs-page-link button" data-page="%d" data-order-id="%d">%s</a>',
-								$page + 1,
+								'<a href="#" class="ihumbak-logs-page-link" data-page="%d" data-order-id="%d">%d</a> ',
+								$i,
 								$order_id,
-								esc_html__( 'Next »', 'ihumbak-order-logs' )
+								$i
 							);
 						}
-						?>
-					</div>
-				<?php endif; ?>
-			<?php else : ?>
-				<div class="ihumbak-order-logs-empty">
-					<?php esc_html_e( 'No changes recorded yet.', 'ihumbak-order-logs' ); ?>
+					}
+
+					// Next button.
+					if ( $page < $total_pages ) {
+						printf(
+							'<a href="#" class="ihumbak-logs-page-link button" data-page="%d" data-order-id="%d">%s</a>',
+							$page + 1,
+							$order_id,
+							esc_html__( 'Next »', 'ihumbak-order-logs' )
+						);
+					}
+					?>
 				</div>
 			<?php endif; ?>
-		</div>
-		<?php
+		<?php else : ?>
+			<div class="ihumbak-order-logs-empty">
+				<?php esc_html_e( 'No changes recorded yet.', 'ihumbak-order-logs' ); ?>
+			</div>
+		<?php endif;
 	}
 
 	/**
