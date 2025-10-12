@@ -78,6 +78,8 @@ class Admin_Interface {
 
 		// AJAX handlers.
 		add_action( 'wp_ajax_ihumbak_get_order_logs', array( $this, 'ajax_get_order_logs' ) );
+
+		$this->get_settings();
 	}
 
 	/**
