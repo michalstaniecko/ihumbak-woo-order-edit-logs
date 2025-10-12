@@ -185,7 +185,7 @@ function ihumbak_order_logs_autoloader( $class ) {
 	}
 
 	// Build the full file path.
-	$file = $base_dir . $relative_path;
+	$file = strtolower($base_dir . $relative_path);
 
 	// If the file exists, require it.
 	if ( file_exists( $file ) ) {
