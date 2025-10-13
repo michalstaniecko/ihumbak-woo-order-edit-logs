@@ -73,4 +73,44 @@ class MetadataHooksTest extends TestCase {
 		require_once IHUMBAK_ORDER_LOGS_PATH . 'includes/hooks/metadata-hooks.php';
 		$this->assertTrue( function_exists( 'IHumBak\WooOrderEditLogs\Hooks\track_post_meta_delete' ) );
 	}
+
+	/**
+	 * Test that capture_hpos_meta_update function exists (for HPOS support).
+	 */
+	public function test_capture_hpos_meta_update_function_exists() {
+		require_once IHUMBAK_ORDER_LOGS_PATH . 'includes/hooks/metadata-hooks.php';
+		$this->assertTrue( function_exists( 'IHumBak\WooOrderEditLogs\Hooks\capture_hpos_meta_update' ) );
+	}
+
+	/**
+	 * Test that track_hpos_meta_add function exists (for HPOS support).
+	 */
+	public function test_track_hpos_meta_add_function_exists() {
+		require_once IHUMBAK_ORDER_LOGS_PATH . 'includes/hooks/metadata-hooks.php';
+		$this->assertTrue( function_exists( 'IHumBak\WooOrderEditLogs\Hooks\track_hpos_meta_add' ) );
+	}
+
+	/**
+	 * Test that track_hpos_meta_update_action function exists (for HPOS support).
+	 */
+	public function test_track_hpos_meta_update_action_function_exists() {
+		require_once IHUMBAK_ORDER_LOGS_PATH . 'includes/hooks/metadata-hooks.php';
+		$this->assertTrue( function_exists( 'IHumBak\WooOrderEditLogs\Hooks\track_hpos_meta_update_action' ) );
+	}
+
+	/**
+	 * Test that track_hpos_meta_delete function exists (for HPOS support).
+	 */
+	public function test_track_hpos_meta_delete_function_exists() {
+		require_once IHUMBAK_ORDER_LOGS_PATH . 'includes/hooks/metadata-hooks.php';
+		$this->assertTrue( function_exists( 'IHumBak\WooOrderEditLogs\Hooks\track_hpos_meta_delete' ) );
+	}
+
+	/**
+	 * Test that is_order helper function exists (for HPOS support).
+	 */
+	public function test_is_order_function_exists() {
+		require_once IHUMBAK_ORDER_LOGS_PATH . 'includes/hooks/metadata-hooks.php';
+		$this->assertTrue( function_exists( 'IHumBak\WooOrderEditLogs\Hooks\is_order' ) );
+	}
 }
