@@ -105,10 +105,10 @@ When `$order->save()` triggers `update_post_meta()` internally:
 
 ## Compatibility Matrix
 
-| Storage Mode | update_post_meta() | Direct Metadata API | $order->update_meta_data() |
-|--------------|-------------------|---------------------|----------------------------|
-| CPT          | ✅ Metadata Hooks | ✅ Metadata Hooks   | ✅ Snapshot Approach      |
-| HPOS         | N/A (not used)    | ✅ Metadata Hooks   | ✅ Snapshot Approach      |
+| Storage Mode | update_post_meta() | WC Metadata Hooks | $order->update_meta_data() |
+|--------------|-------------------|-------------------|----------------------------|
+| CPT          | ✅ Metadata Hooks | N/A               | ✅ Snapshot Approach       |
+| HPOS         | N/A (not used)    | ✅ Metadata Hooks | ✅ Snapshot Approach       |
 
 ## Code Flow Example
 
@@ -141,14 +141,16 @@ $order->save();
 // 7. Logs change via snapshot approach
 ```
 
-### Scenario 3: Direct metadata update in HPOS mode
+### Scenario 3: Metadata update in HPOS mode
 ```php
 // Plugin/theme code in HPOS mode
-update_metadata('wc_order', $order_id, '_billing_vat', 'PL1234567890');
+$order = wc_get_order($order_id);
+$order->update_meta_data('_billing_vat', 'PL1234567890');
+$order->save();
 
 // Plugin behavior
-// 1. update_metadata filter triggered (universal metadata filter)
-// 2. capture_hpos_meta_update() checks: is order? ✓, is tracked? ✓, has snapshot? ✗
+// 1. WooCommerce triggers updated_wc_order_meta action hook
+// 2. track_hpos_meta_update_action() checks: is order? ✓, is tracked? ✓, has snapshot? ✗
 // 3. Logs change immediately
-// 4. Returns null to allow update
+// Note: Old value not available in action hook context
 ```

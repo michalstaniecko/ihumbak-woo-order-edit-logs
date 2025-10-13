@@ -21,7 +21,6 @@ Monitors direct metadata operations for both CPT and HPOS modes:
 - `deleted_post_meta` action - Tracks deleted meta fields
 
 **HPOS Mode Hooks:**
-- `update_metadata` filter - Universal filter for all metadata types including HPOS
 - `added_wc_order_meta` action - Tracks new HPOS order meta fields
 - `updated_wc_order_meta` action - Tracks updated HPOS order meta fields
 - `deleted_wc_order_meta` action - Tracks deleted HPOS order meta fields
@@ -83,21 +82,22 @@ $order->save();
 5. Snapshot approach logs the change
 6. Snapshot is deleted
 
-### Scenario 3: Direct HPOS Metadata Update
+### Scenario 3: HPOS Metadata Change via WooCommerce Hooks
 ```php
-// In HPOS mode, direct metadata update (rare but possible)
+// In HPOS mode, WooCommerce triggers metadata action hooks
+// when order metadata is modified through any method
 $order = wc_get_order($order_id);
-// Direct metadata API call bypassing order save
-update_metadata('wc_order', $order_id, '_billing_vat', 'PL1234567890');
+$order->update_meta_data('_billing_vat', 'PL1234567890');
+$order->save();
 ```
 
-1. WordPress triggers `update_metadata` filter
-2. Our `capture_hpos_meta_update()` function is called
+1. WooCommerce triggers `updated_wc_order_meta` action
+2. Our `track_hpos_meta_update_action()` function is called
 3. Checks if object is a WooCommerce order (using `wc_get_order()`)
 4. Checks if this meta key is tracked
 5. Checks if no snapshot exists (not in the middle of order save)
-6. Logs the change immediately
-7. Allows the update to proceed
+6. Logs the change
+7. Note: Old value not available in action hook context
 
 ### Deduplication Logic
 The key to preventing duplicate logs is checking for the existence of a snapshot:
@@ -113,7 +113,7 @@ The key to preventing duplicate logs is checking for the existence of a snapshot
 
 ### HPOS Mode (High-Performance Order Storage)
 - ✅ Tracks `$order->update_meta_data()` + `$order->save()` via snapshot approach
-- ✅ Tracks direct metadata updates via universal `update_metadata` filter
+- ✅ Tracks metadata changes via WooCommerce HPOS action hooks
 - ✅ Tracks HPOS-specific metadata operations via `added_wc_order_meta`, `updated_wc_order_meta`, `deleted_wc_order_meta` hooks
 - ✅ All changes tracked via both metadata hooks and snapshot approach
 

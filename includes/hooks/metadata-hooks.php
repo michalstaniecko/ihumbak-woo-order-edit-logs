@@ -28,11 +28,8 @@ function init_metadata_hooks() {
 	add_action( 'added_post_meta', __NAMESPACE__ . '\track_post_meta_add', 10, 4 );
 	add_action( 'deleted_post_meta', __NAMESPACE__ . '\track_post_meta_delete', 10, 4 );
 
-	// Hook for HPOS mode - use universal metadata hooks.
-	// The update_metadata filter fires for all meta types including HPOS.
-	// WooCommerce HPOS may use 'wc_order' or other custom meta types.
-	add_filter( 'update_metadata', __NAMESPACE__ . '\capture_hpos_meta_update', 10, 5 );
-	
+	// Hook for HPOS mode - WooCommerce-specific metadata hooks.
+	// These hooks are triggered by WooCommerce when HPOS order metadata is modified.
 	// Dynamic hooks for HPOS metadata operations.
 	// WooCommerce HPOS uses different meta types depending on the configuration.
 	// We hook into the most common ones to ensure compatibility.
@@ -217,71 +214,6 @@ function is_tracked_meta_key( $meta_key ) {
 	$custom_fields = $settings->get_custom_meta_fields();
 
 	return in_array( $meta_key, $custom_fields, true );
-}
-
-/**
- * Capture and track HPOS meta update.
- *
- * Triggered before metadata is updated (works for all meta types including HPOS).
- * This filter allows us to capture the old value before it's changed.
- *
- * @param null|bool $check      Whether to allow updating metadata.
- * @param string    $meta_type  Type of object metadata is for (e.g., 'post', 'hpos_order').
- * @param int       $object_id  Object ID.
- * @param string    $meta_key   Meta key.
- * @param mixed     $meta_value New meta value.
- * @return null|bool Null to continue with the update, or a boolean to short-circuit.
- */
-function capture_hpos_meta_update( $check, $meta_type, $object_id, $meta_key, $meta_value ) {
-	// Skip if this is post meta (handled by capture_meta_update).
-	if ( 'post' === $meta_type ) {
-		return $check;
-	}
-
-	// Check if this is an order by trying to get the order object.
-	// In HPOS mode, wc_get_order() works with order IDs.
-	if ( ! function_exists( 'wc_get_order' ) ) {
-		return $check;
-	}
-
-	$order = wc_get_order( $object_id );
-	if ( ! $order || ! $order instanceof \WC_Order ) {
-		return $check;
-	}
-
-	// Check if this meta key is tracked.
-	if ( ! is_tracked_meta_key( $meta_key ) ) {
-		return $check;
-	}
-
-	// Check if we're in the middle of an order save operation.
-	// If snapshot exists, let the snapshot approach handle logging.
-	if ( \IHumBak\WooOrderEditLogs\Log_Tracker::get_snapshot( $object_id ) !== false ) {
-		return $check;
-	}
-
-	// Get the current (old) value before it's updated.
-	$old_value = $order->get_meta( $meta_key, true );
-	
-	// If values are the same, skip logging.
-	// Use loose comparison to handle numeric strings.
-	// phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
-	if ( $old_value == $meta_value ) {
-		return $check;
-	}
-
-	// Log the change immediately.
-	$logger = Order_Logger::get_instance();
-	$logger->log_change(
-		$object_id,
-		'custom_field_changed',
-		$meta_key,
-		$old_value,
-		$meta_value
-	);
-
-	// Return null to continue with the update.
-	return $check;
 }
 
 /**

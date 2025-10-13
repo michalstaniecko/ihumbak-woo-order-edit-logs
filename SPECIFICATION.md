@@ -244,7 +244,9 @@ Plugin wykorzystuje następujące hooki do przechwytywania zmian. Wszystkie hook
 - `deleted_post_meta` - Usunięcie metadanych (args: $meta_ids, $object_id, $meta_key, $meta_value)
 
 **Dla trybu HPOS:**
-- `update_metadata` - Filter do przechwytywania zmian meta (sprawdzenie object_type)
+- `added_wc_order_meta` - Dodanie metadanych zamówienia HPOS (args: $meta_id, $object_id, $meta_key, $meta_value)
+- `updated_wc_order_meta` - Aktualizacja metadanych zamówienia HPOS (args: $meta_id, $object_id, $meta_key, $meta_value)
+- `deleted_wc_order_meta` - Usunięcie metadanych zamówienia HPOS (args: $meta_ids, $object_id, $meta_key, $meta_value)
 - Alternatywnie: hook w `woocommerce_update_order` i sprawdzanie zmian przez `$order->get_meta_data()`
 
 #### 3.3.6. Dodatkowe Hooki dla Szczególnych Przypadków
