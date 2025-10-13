@@ -10,19 +10,28 @@ Implemented a dual-mode tracking system that monitors custom meta field changes 
 
 ## Changes Made
 
-### 1. New Metadata Hooks File
+### 1. Metadata Hooks File
 **File**: `includes/hooks/metadata-hooks.php`
 
-Added a new hooks file that monitors direct WordPress metadata operations:
+Monitors direct metadata operations for both CPT and HPOS modes:
+
+**CPT Mode Hooks:**
 - `update_post_metadata` filter - Captures updates before they occur
 - `added_post_meta` action - Tracks new meta fields
 - `deleted_post_meta` action - Tracks deleted meta fields
 
+**HPOS Mode Hooks:**
+- `update_metadata` filter - Universal filter for all metadata types including HPOS
+- `added_wc_order_meta` action - Tracks new HPOS order meta fields
+- `updated_wc_order_meta` action - Tracks updated HPOS order meta fields
+- `deleted_wc_order_meta` action - Tracks deleted HPOS order meta fields
+
 **Key Features**:
 - Only tracks configured custom meta fields (from plugin settings)
-- Only monitors WooCommerce order post types
+- Only monitors WooCommerce orders (both CPT and HPOS)
 - Prevents duplicate logging by checking for active snapshots
 - Logs changes immediately when meta is updated directly
+- Full compatibility with both storage modes
 
 ### 2. Integration with Order Logger
 **File**: `includes/class-order-logger.php`
@@ -74,6 +83,22 @@ $order->save();
 5. Snapshot approach logs the change
 6. Snapshot is deleted
 
+### Scenario 3: Direct HPOS Metadata Update
+```php
+// In HPOS mode, direct metadata update (rare but possible)
+$order = wc_get_order($order_id);
+// Direct metadata API call bypassing order save
+update_metadata('wc_order', $order_id, '_billing_vat', 'PL1234567890');
+```
+
+1. WordPress triggers `update_metadata` filter
+2. Our `capture_hpos_meta_update()` function is called
+3. Checks if object is a WooCommerce order (using `wc_get_order()`)
+4. Checks if this meta key is tracked
+5. Checks if no snapshot exists (not in the middle of order save)
+6. Logs the change immediately
+7. Allows the update to proceed
+
 ### Deduplication Logic
 The key to preventing duplicate logs is checking for the existence of a snapshot:
 - **Snapshot exists** → Order save in progress → Let snapshot approach handle logging
@@ -88,8 +113,9 @@ The key to preventing duplicate logs is checking for the existence of a snapshot
 
 ### HPOS Mode (High-Performance Order Storage)
 - ✅ Tracks `$order->update_meta_data()` + `$order->save()` via snapshot approach
-- ⚠️ Metadata hooks won't fire (HPOS doesn't use `update_post_meta()`)
-- ✅ All changes tracked via snapshot approach
+- ✅ Tracks direct metadata updates via universal `update_metadata` filter
+- ✅ Tracks HPOS-specific metadata operations via `added_wc_order_meta`, `updated_wc_order_meta`, `deleted_wc_order_meta` hooks
+- ✅ All changes tracked via both metadata hooks and snapshot approach
 
 ## Testing
 
@@ -123,9 +149,14 @@ See `TESTING_CUSTOM_META_FIELDS.md` for detailed testing instructions.
 ## Conclusion
 
 The implementation successfully addresses the issue by:
-1. Supporting both `update_post_meta()` and `$order->update_meta_data()` methods
-2. Preventing duplicate logging
-3. Maintaining backward compatibility
-4. Providing comprehensive documentation and tests
+1. Supporting both `update_post_meta()` (CPT mode) and direct metadata updates (HPOS mode)
+2. Supporting `$order->update_meta_data()` + `$order->save()` methods (both modes)
+3. Preventing duplicate logging through snapshot checking
+4. Maintaining full backward compatibility
+5. Providing comprehensive documentation and tests
+6. **Full HPOS compatibility** - tracking works in both CPT and HPOS storage modes
 
-The system now tracks custom meta field changes regardless of how themes or plugins update the metadata.
+The system now tracks custom meta field changes regardless of:
+- Storage mode (CPT or HPOS)
+- Update method used (direct metadata API or WooCommerce order methods)
+- Theme or plugin implementation

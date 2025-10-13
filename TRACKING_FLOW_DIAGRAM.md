@@ -105,10 +105,10 @@ When `$order->save()` triggers `update_post_meta()` internally:
 
 ## Compatibility Matrix
 
-| Storage Mode | update_post_meta() | $order->update_meta_data() |
-|--------------|-------------------|----------------------------|
-| CPT          | ✅ Metadata Hooks | ✅ Snapshot Approach      |
-| HPOS         | N/A (not used)    | ✅ Snapshot Approach      |
+| Storage Mode | update_post_meta() | Direct Metadata API | $order->update_meta_data() |
+|--------------|-------------------|---------------------|----------------------------|
+| CPT          | ✅ Metadata Hooks | ✅ Metadata Hooks   | ✅ Snapshot Approach      |
+| HPOS         | N/A (not used)    | ✅ Metadata Hooks   | ✅ Snapshot Approach      |
 
 ## Code Flow Example
 
@@ -139,4 +139,16 @@ $order->save();
 // 5. Skips logging (snapshot will handle it)
 // 6. woocommerce_after_order_object_save compares snapshot
 // 7. Logs change via snapshot approach
+```
+
+### Scenario 3: Direct metadata update in HPOS mode
+```php
+// Plugin/theme code in HPOS mode
+update_metadata('wc_order', $order_id, '_billing_vat', 'PL1234567890');
+
+// Plugin behavior
+// 1. update_metadata filter triggered (universal metadata filter)
+// 2. capture_hpos_meta_update() checks: is order? ✓, is tracked? ✓, has snapshot? ✗
+// 3. Logs change immediately
+// 4. Returns null to allow update
 ```
