@@ -16,69 +16,25 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.inputs.branch || github.ref }}
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '7.4'
-          tools: composer
-
-      - name: Install dependencies
-        run: composer install --no-dev --optimize-autoloader
-
-      - name: Get branch name
-        id: branch-name
-        run: |
-          if [ -n "${{ github.event.inputs.branch }}" ]; then
-            BRANCH="${{ github.event.inputs.branch }}"
-          else
-            BRANCH="${GITHUB_REF#refs/heads/}"
-          fi
-          echo "BRANCH=${BRANCH}" >> $GITHUB_ENV
-          echo "Branch: ${BRANCH}"
 
       - name: Create plugin ZIP
         run: |
-          # Get plugin version and branch info
+          BRANCH_NAME="${{ github.ref_name }}"
+          BRANCH_NAME_SAFE="${BRANCH_NAME//\//-}"
           VERSION=$(date +%Y%m%d-%H%M%S)
-          BRANCH_SAFE=$(echo "${BRANCH}" | sed 's/\//-/g')
           PLUGIN_NAME="ihumbak-woo-order-edit-logs"
-          ZIP_NAME="${PLUGIN_NAME}-${BRANCH_SAFE}-${VERSION}.zip"
+          ZIP_NAME="${PLUGIN_NAME}-${VERSION}-${BRANCH_NAME_SAFE}"
 
-          # Create a temporary directory for the plugin
-          mkdir -p /tmp/${PLUGIN_NAME}
+          mkdir -p ${PLUGIN_NAME}
 
-          # Copy plugin files (excluding development files)
-          rsync -av --exclude='.git' \
-            --exclude='.github' \
-            --exclude='node_modules' \
-            --exclude='tests' \
-            --exclude='phpunit.xml.dist' \
-            --exclude='phpcs.xml' \
-            --exclude='phpstan.neon' \
-            --exclude='phpstan-bootstrap.php' \
-            --exclude='.editorconfig' \
-            --exclude='composer.json' \
-            --exclude='composer.lock' \
-            --exclude='DEVELOPMENT.md' \
-            --exclude='WORKING_PLAN.md' \
-            --exclude='SPECIFICATION.md' \
-            --exclude='.gitignore' \
-            ./ /tmp/${PLUGIN_NAME}/
-
-          # Create ZIP file
-          cd /tmp
-          zip -r ${ZIP_NAME} ${PLUGIN_NAME}
-          mv ${ZIP_NAME} ${GITHUB_WORKSPACE}/
-
-          echo "Created ZIP file: ${ZIP_NAME}"
+          cp -r assets includes languages ihumbak-woo-order-edit-logs.php uninstall.php ./${PLUGIN_NAME}
+          zip -r ${ZIP_NAME}.zip ${PLUGIN_NAME}
           echo "ZIP_NAME=${ZIP_NAME}" >> $GITHUB_ENV
+          echo "PLUGIN_NAME=${PLUGIN_NAME}" >> $GITHUB_ENV
 
       - name: Upload ZIP as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: plugin-zip-${{ env.BRANCH }}
-          path: ${{ env.ZIP_NAME }}
+          name: ${{ env.PLUGIN_NAME }}
+          path: ${{ env.ZIP_NAME }}.zip
           retention-days: 30
