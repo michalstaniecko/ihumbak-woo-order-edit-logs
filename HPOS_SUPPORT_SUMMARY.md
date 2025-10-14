@@ -13,9 +13,6 @@
 The `init_metadata_hooks()` function now registers additional hooks for HPOS compatibility:
 
 ```php
-// Universal metadata filter (works for all meta types)
-add_filter( 'update_metadata', __NAMESPACE__ . '\capture_hpos_meta_update', 10, 5 );
-
 // HPOS-specific metadata action hooks
 add_action( 'added_wc_order_meta', __NAMESPACE__ . '\track_hpos_meta_add', 10, 4 );
 add_action( 'updated_wc_order_meta', __NAMESPACE__ . '\track_hpos_meta_update_action', 10, 4 );
@@ -43,32 +40,24 @@ function is_order( $object_id, $meta_type = 'post' ) {
 ```
 
 #### New HPOS Handler Functions
-Added four new functions to handle HPOS metadata operations:
+Added three new functions to handle HPOS metadata operations:
 
-1. **`capture_hpos_meta_update()`** - Filter hook that captures metadata updates before they occur
-   - Works with the universal `update_metadata` filter
-   - Skips post meta (handled by existing CPT hooks)
-   - Verifies object is a WooCommerce order
-   - Checks for snapshot to prevent duplicate logging
-   - Logs the change with old and new values
-
-2. **`track_hpos_meta_add()`** - Tracks new metadata additions in HPOS mode
+1. **`track_hpos_meta_add()`** - Tracks new metadata additions in HPOS mode
    - Triggered by `added_wc_order_meta` action
    - Logs with empty old value
 
-3. **`track_hpos_meta_update_action()`** - Tracks metadata updates via action hook
+2. **`track_hpos_meta_update_action()`** - Tracks metadata updates via action hook
    - Triggered by `updated_wc_order_meta` action
-   - Provides fallback for metadata updates
+   - Handles metadata updates in HPOS mode
    - Note: Old value not available in action hook context
 
-4. **`track_hpos_meta_delete()`** - Tracks metadata deletions in HPOS mode
+3. **`track_hpos_meta_delete()`** - Tracks metadata deletions in HPOS mode
    - Triggered by `deleted_wc_order_meta` action
    - Logs with empty new value
 
 ### 2. Updated Tests (`tests/MetadataHooksTest.php`)
 
 Added test cases for all new HPOS-related functions:
-- `test_capture_hpos_meta_update_function_exists()`
 - `test_track_hpos_meta_add_function_exists()`
 - `test_track_hpos_meta_update_action_function_exists()`
 - `test_track_hpos_meta_delete_function_exists()`
@@ -93,9 +82,8 @@ Added test cases for all new HPOS-related functions:
 2. `$order->update_meta_data()` + `$order->save()` → snapshot approach
 
 ### HPOS Mode (High-Performance Order Storage)
-1. Direct metadata API calls → `update_metadata` filter → `capture_hpos_meta_update()` → logged immediately
-2. WooCommerce order metadata hooks → `added_wc_order_meta`, `updated_wc_order_meta`, `deleted_wc_order_meta` → logged
-3. `$order->update_meta_data()` + `$order->save()` → snapshot approach (existing functionality)
+1. WooCommerce order metadata hooks → `added_wc_order_meta`, `updated_wc_order_meta`, `deleted_wc_order_meta` → logged
+2. `$order->update_meta_data()` + `$order->save()` → snapshot approach (existing functionality)
 
 ### Deduplication
 The implementation prevents duplicate logging by:
@@ -105,10 +93,10 @@ The implementation prevents duplicate logging by:
 
 ## Compatibility
 
-| Storage Mode | update_post_meta() | Direct Metadata API | $order->update_meta_data() |
-|--------------|-------------------|---------------------|----------------------------|
-| CPT          | ✅ Metadata Hooks | ✅ Metadata Hooks   | ✅ Snapshot Approach      |
-| HPOS         | N/A               | ✅ Metadata Hooks   | ✅ Snapshot Approach      |
+| Storage Mode | update_post_meta() | WC Metadata Hooks | $order->update_meta_data() |
+|--------------|-------------------|-------------------|----------------------------|
+| CPT          | ✅ Metadata Hooks | N/A               | ✅ Snapshot Approach       |
+| HPOS         | N/A               | ✅ Metadata Hooks | ✅ Snapshot Approach       |
 
 ## Testing
 
@@ -118,13 +106,7 @@ To test HPOS compatibility:
    - WooCommerce → Settings → Advanced → Features
    - Enable "High-Performance Order Storage"
 
-2. **Test direct metadata updates:**
-   ```php
-   // Should be logged via HPOS metadata hooks
-   update_metadata('wc_order', $order_id, '_custom_field', 'value');
-   ```
-
-3. **Test WooCommerce methods:**
+2. **Test WooCommerce methods:**
    ```php
    // Should be logged via snapshot approach
    $order = wc_get_order($order_id);
@@ -132,7 +114,7 @@ To test HPOS compatibility:
    $order->save();
    ```
 
-4. **Verify no duplicate logging:**
+3. **Verify no duplicate logging:**
    - Each change should appear only once in the logs
    - Check that snapshot approach doesn't duplicate metadata hook logging
 

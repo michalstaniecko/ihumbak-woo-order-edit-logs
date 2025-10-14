@@ -16,10 +16,10 @@
 | `$order->update_meta_data()` + `$order->save()` | ✅ Snapshot | ✅ Snapshot |
 
 ### Limitations
-- ❌ No support for HPOS direct metadata updates
+- ❌ No support for HPOS metadata change tracking
 - ❌ Only CPT mode metadata hooks registered
 - ❌ Plugin relied solely on snapshot approach for HPOS
-- ❌ Missing hooks: `update_metadata`, `added_wc_order_meta`, etc.
+- ❌ Missing WooCommerce HPOS hooks: `added_wc_order_meta`, `updated_wc_order_meta`, `deleted_wc_order_meta`
 - ❌ No HPOS-aware order checking
 
 ### Code State
@@ -36,21 +36,20 @@
 | Scenario | CPT Mode | HPOS Mode |
 |----------|----------|-----------|
 | `update_post_meta()` | ✅ Tracked | N/A (not used) |
-| Direct metadata API | ✅ Tracked | ✅ **NEW!** Tracked |
+| WooCommerce metadata hooks | N/A | ✅ **NEW!** Tracked |
 | `$order->update_meta_data()` + `$order->save()` | ✅ Snapshot | ✅ Snapshot |
 
 ### Improvements
-- ✅ Full HPOS support for direct metadata updates
-- ✅ Universal `update_metadata` filter handles all meta types
-- ✅ HPOS-specific action hooks registered
+- ✅ Full HPOS support for metadata change tracking
+- ✅ WooCommerce HPOS action hooks registered
 - ✅ New `is_order()` helper function for both modes
 - ✅ Comprehensive HPOS metadata tracking
 
 ### Code State
-- **Functions:** 11 functions (+5 new)
-- **Tests:** 12 test cases (+6 new)
-- **Lines of code:** ~394 lines (+209 lines)
-- **Hooks registered:** 7 (+4 new)
+- **Functions:** 10 functions (+4 new)
+- **Tests:** 11 test cases (+5 new)
+- **Lines of code:** ~330 lines (+145 lines)
+- **Hooks registered:** 6 (+3 new)
 
 ---
 
@@ -66,20 +65,13 @@ if ( is_order( $object_id, 'hpos' ) ) {
 }
 ```
 
-### 2. `capture_hpos_meta_update($check, $meta_type, $object_id, $meta_key, $meta_value)`
-Universal metadata filter handler that:
-- Captures all metadata updates (not just post meta)
-- Skips post meta (handled by existing function)
-- Verifies object is a WooCommerce order
-- Logs changes with old and new values
-
-### 3. `track_hpos_meta_add($meta_id, $object_id, $meta_key, $meta_value)`
+### 2. `track_hpos_meta_add($meta_id, $object_id, $meta_key, $meta_value)`
 Tracks new metadata added to HPOS orders.
 
-### 4. `track_hpos_meta_update_action($meta_id, $object_id, $meta_key, $meta_value)`
-Tracks metadata updates via action hook (fallback method).
+### 3. `track_hpos_meta_update_action($meta_id, $object_id, $meta_key, $meta_value)`
+Tracks metadata updates via action hook for HPOS orders.
 
-### 5. `track_hpos_meta_delete($meta_ids, $object_id, $meta_key, $meta_value)`
+### 4. `track_hpos_meta_delete($meta_ids, $object_id, $meta_key, $meta_value)`
 Tracks metadata deletion from HPOS orders.
 
 ---
@@ -96,7 +88,6 @@ add_action( 'deleted_post_meta', ... );
 add_filter( 'update_post_metadata', ... );        // CPT
 add_action( 'added_post_meta', ... );             // CPT
 add_action( 'deleted_post_meta', ... );           // CPT
-add_filter( 'update_metadata', ... );             // HPOS ← NEW!
 add_action( 'added_wc_order_meta', ... );         // HPOS ← NEW!
 add_action( 'updated_wc_order_meta', ... );       // HPOS ← NEW!
 add_action( 'deleted_wc_order_meta', ... );       // HPOS ← NEW!
@@ -124,7 +115,9 @@ add_action( 'deleted_wc_order_meta', ... );       // HPOS ← NEW!
 update_post_meta($order_id, '_custom_field', 'value');
 
 // HPOS Mode: ❌ Not tracked
-update_metadata('wc_order', $order_id, '_custom_field', 'value');
+$order = wc_get_order($order_id);
+$order->update_meta_data('_custom_field', 'value');
+$order->save();
 ```
 
 ### After
@@ -133,7 +126,9 @@ update_metadata('wc_order', $order_id, '_custom_field', 'value');
 update_post_meta($order_id, '_custom_field', 'value');
 
 // HPOS Mode: ✅ Now works!
-update_metadata('wc_order', $order_id, '_custom_field', 'value');
+$order = wc_get_order($order_id);
+$order->update_meta_data('_custom_field', 'value');
+$order->save(); // Triggers updated_wc_order_meta hook
 ```
 
 ---

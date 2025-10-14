@@ -75,14 +75,6 @@ class MetadataHooksTest extends TestCase {
 	}
 
 	/**
-	 * Test that capture_hpos_meta_update function exists (for HPOS support).
-	 */
-	public function test_capture_hpos_meta_update_function_exists() {
-		require_once IHUMBAK_ORDER_LOGS_PATH . 'includes/hooks/metadata-hooks.php';
-		$this->assertTrue( function_exists( 'IHumBak\WooOrderEditLogs\Hooks\capture_hpos_meta_update' ) );
-	}
-
-	/**
 	 * Test that track_hpos_meta_add function exists (for HPOS support).
 	 */
 	public function test_track_hpos_meta_add_function_exists() {
