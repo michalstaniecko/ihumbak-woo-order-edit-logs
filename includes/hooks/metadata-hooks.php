@@ -43,10 +43,10 @@ function init_metadata_hooks() {
  * This filter allows us to capture the old value before it's changed.
  *
  * @param null|bool $check Whether to allow updating metadata.
- * @param int       $object_id Post ID.
- * @param string    $meta_key Meta key.
- * @param mixed     $meta_value New meta value.
- * @param mixed     $prev_value Previous meta value (if specified in update_post_meta).
+ * @param int $object_id Post ID.
+ * @param string $meta_key Meta key.
+ * @param mixed $meta_value New meta value.
+ * @param mixed $prev_value Previous meta value (if specified in update_post_meta).
  * @return null|bool Null to continue with the update, or a boolean to short-circuit.
  */
 function capture_meta_update( $check, $object_id, $meta_key, $meta_value, $prev_value ) {
@@ -98,10 +98,10 @@ function capture_meta_update( $check, $object_id, $meta_key, $meta_value, $prev_
  *
  * Triggered when add_post_meta() is called in CPT mode.
  *
- * @param int    $meta_id ID of updated metadata entry.
- * @param int    $object_id Post ID.
+ * @param int $meta_id ID of updated metadata entry.
+ * @param int $object_id Post ID.
  * @param string $meta_key Meta key.
- * @param mixed  $meta_value Meta value.
+ * @param mixed $meta_value Meta value.
  */
 function track_post_meta_add( $meta_id, $object_id, $meta_key, $meta_value ) {
 	// Check if this is a WooCommerce order post type.
@@ -130,10 +130,10 @@ function track_post_meta_add( $meta_id, $object_id, $meta_key, $meta_value ) {
  *
  * Triggered when delete_post_meta() is called in CPT mode.
  *
- * @param array  $meta_ids An array of deleted metadata entry IDs.
- * @param int    $object_id Post ID.
+ * @param array $meta_ids An array of deleted metadata entry IDs.
+ * @param int $object_id Post ID.
  * @param string $meta_key Meta key.
- * @param mixed  $meta_value Meta value.
+ * @param mixed $meta_value Meta value.
  */
 function track_post_meta_delete( $meta_ids, $object_id, $meta_key, $meta_value ) {
 	// Check if this is a WooCommerce order post type.
@@ -176,7 +176,7 @@ function is_order_post_type( $post_id ) {
 /**
  * Check if an object ID is a WooCommerce order (works for both CPT and HPOS).
  *
- * @param int    $object_id Object ID.
+ * @param int $object_id Object ID.
  * @param string $meta_type Meta type (e.g., 'post', 'hpos_order').
  * @return bool True if object is an order, false otherwise.
  */
@@ -209,7 +209,7 @@ function is_tracked_meta_key( $meta_key ) {
 		return false;
 	}
 
-	$settings      = \IHumBak\WooOrderEditLogs\Admin\Settings::get_instance();
+	$settings = \IHumBak\WooOrderEditLogs\Admin\Settings::get_instance();
 	$custom_fields = $settings->get_custom_meta_fields();
 
 	return in_array( $meta_key, $custom_fields, true );
@@ -222,15 +222,16 @@ function is_tracked_meta_key( $meta_key ) {
  * @return void
  */
 function capture_hpos_meta_update( $order ) {
-	$settings  = Settings::get_instance();
+	$settings = Settings::get_instance();
 	$meta_keys = $settings->get_custom_meta_fields();
 	$old_order = new WC_Order( $order->get_id() );
+	$transient_key_prefix = Log_Tracker::get_prefix() . '_' . $order->get_id();
 	if ( empty( $meta_keys ) ) {
 		return;
 	}
 	foreach ( $meta_keys as $meta_key ) {
 		$meta_value = $old_order->get_meta( $meta_key );
-		set_transient( $old_order->get_id() . '_' . $meta_key, $meta_value, HOUR_IN_SECONDS );
+		set_transient( $transient_key_prefix . '_' . $meta_key, $meta_value, HOUR_IN_SECONDS );
 	}
 }
 
@@ -245,10 +246,11 @@ function detect_hpos_meta_changes( $order ) {
 	if ( empty( $meta_keys ) ) {
 		return;
 	}
+	$transient_key_prefix = Log_Tracker::get_prefix() . '_' . $order->get_id();
 	$logger = Order_Logger::get_instance();
 	foreach ( $meta_keys as $meta_key ) {
 		$meta_value = $order->get_meta( $meta_key );
-		$old_value  = get_transient( $order->get_id() . '_' . $meta_key );
+		$old_value = get_transient( $transient_key_prefix . '_' . $meta_key );
 
 		if ( true !== Log_Tracker::compare_scalar( $old_value, $meta_value ) ) {
 			return;
@@ -261,6 +263,6 @@ function detect_hpos_meta_changes( $order ) {
 			$old_value,
 			$meta_value
 		);
-		delete_transient( $order->get_id() . '_' . $meta_key );
+		delete_transient( $transient_key_prefix . '_' . $meta_key );
 	}
 }

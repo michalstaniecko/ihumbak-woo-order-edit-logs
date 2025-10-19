@@ -45,7 +45,7 @@ class Log_Tracker {
 	 */
 	public static function store_snapshot( $order_id ) {
 		$order_data = HPOS_Compatibility::get_order_data_for_comparison( $order_id );
-		
+
 		if ( false === $order_data ) {
 			return false;
 		}
@@ -311,5 +311,9 @@ class Log_Tracker {
 		}
 
 		return $changes;
+	}
+
+	public static function get_prefix() {
+		return self::SNAPSHOT_PREFIX;
 	}
 }
