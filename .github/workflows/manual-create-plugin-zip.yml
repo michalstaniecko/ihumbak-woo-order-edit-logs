@@ -23,7 +23,7 @@ jobs:
           BRANCH_NAME_SAFE="${BRANCH_NAME//\//-}"
           VERSION=$(date +%Y%m%d-%H%M%S)
           PLUGIN_NAME="ihumbak-woo-order-edit-logs"
-          ZIP_NAME="${PLUGIN_NAME}-${VERSION}-${BRANCH_NAME_SAFE}"
+          ZIP_NAME="${PLUGIN_NAME}-${BRANCH_NAME_SAFE}-${VERSION}"
 
           mkdir -p ${PLUGIN_NAME}
 
